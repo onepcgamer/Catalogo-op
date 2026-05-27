@@ -2,7 +2,7 @@
 // src/App.jsx  —  ONE PC · Tienda principal
 // ═══════════════════════════════════════════════════
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getProducts, getBanners, getCategories, getProductComponents } from "../utils/store.js";
+import { getProducts, getBanners, getCategories, getProductComponents } from "../../utils/store.js";
 
 // Guard: solo corre en cliente (Astro SSR safe)
 const isBrowser = typeof window !== "undefined";
