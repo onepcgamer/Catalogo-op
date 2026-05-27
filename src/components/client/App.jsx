@@ -1248,10 +1248,10 @@ function AppInner() {
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
           <div className="benefits-row" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
             {[
-              [<IcoTruck s={28} />, "Contra entrega",     "A todo el país"],
-              [<IcoShield s={28} />, "Garantía extendida", "Hasta 24 meses"],
-              [<IcoLock s={28} />, "Pago seguro",         "Múltiples métodos"],
-              [<IcoHeadset s={28} />, "Soporte 24/7",     "Siempre disponibles"],
+              [<IcoTruck s={28} />, "Contra entrega",    "A todo el país"],
+              [<IcoShield s={28} />, "Garantía",         "12 meses"],
+              [<IcoLock s={28} />, "Pago seguro",        "Múltiples métodos"],
+              [<IcoHeadset s={28} />, "Soporte",         "Siempre disponibles"],
             ].map(([icon, t, s], i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <div style={{ color: "#a78bfa", flexShrink: 0 }}>{icon}</div>
@@ -1265,19 +1265,40 @@ function AppInner() {
       {/* BANNER ADDI / CUOTAS */}
       <div style={{ background: "linear-gradient(135deg,#0f172a,#1a0533)", padding: "40px 24px" }}>
         <div className="addi-banner" style={{ maxWidth: 1280, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 32 }}>
-          <div>
-            <h2 style={{ color: "#fff", fontSize: "clamp(20px,3vw,32px)", fontWeight: 900, marginBottom: 8 }}>Paga a tu manera</h2>
+
+          {/* Logo + texto Addi */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {/* Badge Addi */}
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ background: "#5b21b6", borderRadius: 10, padding: "6px 14px", display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ color: "#fff", fontWeight: 900, fontSize: 18, letterSpacing: -0.5 }}>addi</span>
+                <span style={{ background: "#a78bfa", color: "#fff", fontSize: 9, fontWeight: 800, padding: "2px 6px", borderRadius: 20 }}>financiación</span>
+              </div>
+            </div>
+            <h2 style={{ color: "#fff", fontSize: "clamp(18px,2.5vw,28px)", fontWeight: 900, marginBottom: 4, lineHeight: 1.2 }}>Paga a tu manera</h2>
             <p style={{ color: "#9ca3af", fontSize: 14 }}>Cuotas fáciles y sin complicaciones.</p>
+            <button
+              onClick={() => openWA("Hola! Quisiera información sobre el financiamiento con Addi para comprar en ONE PC 😊")}
+              style={{ marginTop: 4, background: "#a78bfa", color: "#fff", border: "none", borderRadius: 8, padding: "10px 22px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif", width: "fit-content", transition: "background .2s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "#7c3aed"}
+              onMouseLeave={e => e.currentTarget.style.background = "#a78bfa"}
+            >
+              💬 Conoce más
+            </button>
           </div>
+
+          {/* Cuotas */}
           <div style={{ textAlign: "center" }}>
-            <p style={{ color: "#fff", fontSize: 28, fontWeight: 900, marginBottom: 4 }}>3, 6, 9 o 12 cuotas</p>
+            <p style={{ color: "#fff", fontSize: "clamp(22px,3vw,32px)", fontWeight: 900, marginBottom: 4 }}>3, 6, 9 o 12 cuotas</p>
             <p style={{ color: "#a78bfa", fontSize: 14, fontWeight: 600 }}>sin tarjeta de crédito</p>
           </div>
+
+          {/* Métodos */}
           <div style={{ background: "#ffffff11", borderRadius: 16, padding: 20, border: "1px solid #5b21b633" }}>
-            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-              {["VISA", "MC", "PSE"].map(b => <span key={b} style={{ background: "#fff", color: "#111", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 4 }}>{b}</span>)}
+            <div style={{ display: "flex", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+              {["VISA", "MC", "PSE", "Addi"].map(b => <span key={b} style={{ background: "#fff", color: "#111", fontSize: 10, fontWeight: 800, padding: "3px 8px", borderRadius: 4 }}>{b}</span>)}
             </div>
-            <p style={{ color: "#9ca3af", fontSize: 11 }}>Múltiples métodos</p>
+            <p style={{ color: "#9ca3af", fontSize: 11 }}>Múltiples métodos de pago</p>
           </div>
         </div>
       </div>
