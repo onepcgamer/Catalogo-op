@@ -3,6 +3,7 @@ import {
   getProducts, saveProducts, addProduct, updateProduct, deleteProduct, updateStock,
   getBrands, saveBrands, addBrand, updateBrand, deleteBrand, toggleBrand,
   getAllComponents, getProductComponents, saveProductComponents, deleteProductComponents,
+  getBanners, saveBanners, getCategories, saveCategories,
   COMP_TYPES_TORRE, COMP_TYPES_PORTATIL, DEFAULT_OPTIONS,
 } from "../../utils/store.js";
 
@@ -32,24 +33,10 @@ const FOCUS_Y = [{v:"top",l:"↑ Arriba"},{v:"center",l:"↕ Centro"},{v:"bottom
 const fmt        = n=>"$"+Number(n||0).toLocaleString("es-CO");
 const parsePrice = v=>Number(String(v||"").replace(/\./g,"").replace(/,/g,".").replace(/[^0-9.]/g,""))||0;
 
-function getCats()     { try{const d=localStorage.getItem(CAT_KEY);    return d?JSON.parse(d):DEFAULT_CATS;}    catch{return DEFAULT_CATS;} }
-function getBannersL() { try{const d=localStorage.getItem(BANNER_KEY); return d?JSON.parse(d):DEFAULT_BANNERS;} catch{return DEFAULT_BANNERS;} }
-function saveCats(c) {
-  try {
-    const json = JSON.stringify(c);
-    localStorage.setItem(CAT_KEY, json);
-    window.dispatchEvent(new Event("onepc_cats_updated"));
-    window.dispatchEvent(new StorageEvent("storage", { key: CAT_KEY, newValue: json, storageArea: localStorage, url: window.location.href }));
-  } catch {}
-}
-function saveBannersL(b) {
-  try {
-    const json = JSON.stringify(b);
-    localStorage.setItem(BANNER_KEY, json);
-    window.dispatchEvent(new Event("onepc_banners_updated"));
-    window.dispatchEvent(new StorageEvent("storage", { key: BANNER_KEY, newValue: json, storageArea: localStorage, url: window.location.href }));
-  } catch {}
-}
+// getCats → usar getCategories() de store.js
+// getBannersL → usar getBanners() de store.js
+// saveCats → usar saveCategories() de store.js
+// saveBannersL → usar saveBanners() de store.js
 
 function compressImg(file, cb, maxW=800, quality=0.65) {
   const canvas=document.createElement("canvas"), ctx=canvas.getContext("2d"), img=new Image(), url=URL.createObjectURL(file);
@@ -167,21 +154,22 @@ function Login({onLogin}){
 // BRANDS
 // ════════════════════════════════════════════════════
 function Brands(){
-  const [brands,setBrands]=useState(()=>getBrands());
+  const [brands,setBrands]=useState([]);
+  useEffect(()=>{ getBrands().then(setBrands); },[]);
   const [form,setForm]=useState({name:""});
   const [editId,setEditId]=useState(null);
   const [toast,setToast]=useState("");
   const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
-  const reload=()=>setBrands(getBrands());
+  const reloadBrands = async () => { const b = await getBrands(); setBrands(b); };
   const handleSave=()=>{
     if(!form.name.trim()){showToast("⚠️ Escribe el nombre de la marca");return;}
-    if(editId){updateBrand(editId,{name:form.name});showToast("✓ Marca actualizada");}
-    else{addBrand({name:form.name});showToast("✓ Marca agregada");}
-    setForm({name:""});setEditId(null);reload();
+    if(editId){ await updateBrand(editId,{name:form.name}); showToast("✓ Marca actualizada"); }
+    else{ await addBrand({name:form.name}); showToast("✓ Marca agregada"); }
+    setForm({name:""}); setEditId(null); reloadBrands();
   };
   const handleEdit=b=>{setEditId(b.id);setForm({name:b.name});};
-  const handleDelete=id=>{if(window.confirm("¿Eliminar marca?")){deleteBrand(id);reload();showToast("🗑️ Marca eliminada");}};
-  const handleToggle=id=>{toggleBrand(id);reload();showToast("✓ Estado cambiado");};
+  const handleDelete = async id => { if(window.confirm('¿Eliminar marca?')){ await deleteBrand(id); reloadBrands(); showToast('🗑️ Marca eliminada'); } };
+  const handleToggle = async id => { await toggleBrand(id); reloadBrands(); showToast('✓ Estado cambiado'); };
   return(
     <div>
       <Toast msg={toast}/>
@@ -324,7 +312,7 @@ function Products({products,reload}){
   const [preview,setPreview]       = useState("");
   const [extraImages,setExtraImages] = useState(["","","",""]);
   const [cats,setCats]             = useState(()=>getCats());
-  const [brands,setBrands]         = useState(()=>getBrands());
+  const [brands,setBrands]         = useState([]);
   const [configProduct,setConfigProduct] = useState(null);
 
   const fileRef    = useRef();
@@ -335,9 +323,11 @@ function Products({products,reload}){
   const extraRefs  = [extraRef0, extraRef1, extraRef2, extraRef3];
 
   useEffect(()=>{
-    const hc=()=>setCats(getCats()); const hb=()=>setBrands(getBrands());
-    window.addEventListener("onepc_cats_updated",hc); window.addEventListener("onepc_brands_updated",hb);
-    return()=>{ window.removeEventListener("onepc_cats_updated",hc); window.removeEventListener("onepc_brands_updated",hb); };
+    getCategories().then(setCats);
+    getBrands().then(setBrands);
+    const hb = () => getBrands().then(setBrands);
+    window.addEventListener("onepc_brands_updated", hb);
+    return () => window.removeEventListener("onepc_brands_updated", hb);
   },[]);
 
   const showToast = msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
@@ -374,8 +364,8 @@ function Products({products,reload}){
       ...form, price, oldPrice, discount, stock:+form.stock||0,
       images: extraImages.filter(Boolean),
     };
-    if(tab==="new"||!editId){addProduct(data);showToast("✓ Producto publicado");}
-    else{updateProduct(editId,data);showToast("✓ Producto actualizado");}
+    if(tab==="new"||!editId){ await addProduct(data); showToast("✓ Producto publicado"); }
+    else { await updateProduct(editId,data); showToast("✓ Producto actualizado"); }
     resetForm(); reload();
   };
 
@@ -388,7 +378,7 @@ function Products({products,reload}){
   };
 
   const handleDelete = id=>{
-    if(window.confirm("¿Eliminar producto?")){deleteProduct(id);deleteProductComponents(id);reload();showToast("🗑️ Eliminado");}
+    if(window.confirm("¿Eliminar producto?")){ await deleteProduct(id); await deleteProductComponents(id); reload(); showToast("🗑️ Eliminado"); }
   };
 
   const subcats      = cats.find(c=>c.name===form.category)?.subcats||[];
@@ -505,7 +495,7 @@ function Products({products,reload}){
         <div className="card" style={{padding:0,overflow:"hidden",alignSelf:"start"}}>
           <div style={{padding:"14px 18px",borderBottom:"1px solid #f0f0f0",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
             <h3 style={{fontSize:15,fontWeight:700}}>En tienda ({products.length})</h3>
-            {products.length>0&&<button className="btn btn-red btn-sm" onClick={()=>{if(window.confirm("¿Eliminar TODO?")){saveProducts([]);reload();}}}>Limpiar</button>}
+            {products.length>0&&<button className="btn btn-red btn-sm" onClick={async ()=>{ if(window.confirm("¿Eliminar TODO?")){ await saveProducts([]); reload(); } }}>Limpiar</button>}
           </div>
           <div style={{maxHeight:680,overflowY:"auto"}}>
             {products.length===0
@@ -545,7 +535,7 @@ function Products({products,reload}){
 function Inventory({products,reload}){
   const [search,setSearch]=useState("");
   const list=products.filter(p=>p.name.toLowerCase().includes(search.toLowerCase()));
-  const hs=(id,d)=>{updateStock(id,d);reload();};
+  const hs = async (id,d) => { await updateStock(id,d); reload(); };
   return(
     <div>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
@@ -627,10 +617,11 @@ function Dashboard({products,setSection}){
 // CATEGORIES
 // ════════════════════════════════════════════════════
 function Categories(){
-  const [cats,setCatsState]=useState(()=>getCats());
+  const [cats,setCatsState]=useState([]);
+  useEffect(()=>{ getCategories().then(setCatsState); },[]);
   const [newCat,setNewCat]=useState(""); const [newSub,setNewSub]=useState({}); const [toast,setToast]=useState(""); const [editing,setEditing]=useState(null);
   const st=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
-  const persist=u=>{setCatsState(u);saveCats(u);};
+  const persist = async u => { setCatsState(u); await saveCategories(u); };
   const addCat=()=>{if(!newCat.trim()){st("⚠️ Escribe el nombre");return;}if(cats.find(c=>c.name.toLowerCase()===newCat.trim().toLowerCase())){st("⚠️ Ya existe");return;}persist([...cats,{id:Date.now(),name:newCat.trim(),subcats:[]}]);setNewCat("");st("✓ Categoría agregada");};
   const delCat=id=>{if(!window.confirm("¿Eliminar?"))return;persist(cats.filter(c=>c.id!==id));st("🗑️ Eliminada");};
   const renCat=(id,name)=>{persist(cats.map(c=>c.id===id?{...c,name}:c));setEditing(null);st("✓ Renombrada");};
@@ -672,23 +663,26 @@ function Categories(){
 // BANNERS — Refactorizado moderno
 // ════════════════════════════════════════════════════
 function Banners(){
-  const [banners,setBanners] = useState(()=>getBannersL());
+  const [banners,setBanners] = useState([]);
+  const [loading,setLoading] = useState(true);
+  useEffect(()=>{ getBanners().then(b=>{ setBanners(b); setLoading(false); }); },[]);
   const [toast,setToast]     = useState("");
   const st  = msg => { setToast(msg); setTimeout(()=>setToast(""),2500); };
 
+  const persist = async (updated) => { setBanners(updated); await saveBanners(updated); };
   const hImg = (id,e) => {
     const file = e.target.files[0]; if(!file) return;
-    compressImg(file, c => {
+    compressImg(file, async c => {
       const u = banners.map(b => b.id===id ? {...b, img:c, imgMobile:c} : b);
-      setBanners(u); saveBannersL(u); st("✓ Banner actualizado");
+      await persist(u); st("✓ Banner actualizado");
     }, 1920, 0.82);
   };
-  const tog     = id      => { const u=banners.map(b=>b.id===id?{...b,activo:!b.activo}:b);        setBanners(u);saveBannersL(u);st("✓ Estado cambiado"); };
-  const rst     = id      => { const u=banners.map(b=>b.id===id?{...b,img:"",imgMobile:""}:b);      setBanners(u);saveBannersL(u);st("🗑️ Imagen eliminada"); };
-  const hLink   = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,link:v}:b);                  setBanners(u); };
-  const hFocusX = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,focusX:v}:b);                setBanners(u);saveBannersL(u);st("✓ Foco actualizado"); };
-  const hFocusY = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,focusY:v}:b);                setBanners(u);saveBannersL(u);st("✓ Foco actualizado"); };
-  const save    = ()      => { saveBannersL(banners); st("✓ Guardado"); };
+  const tog     = async id     => { const u=banners.map(b=>b.id===id?{...b,activo:!b.activo}:b);   await persist(u); st("✓ Estado cambiado"); };
+  const rst     = async id     => { const u=banners.map(b=>b.id===id?{...b,img:"",imgMobile:""}:b); await persist(u); st("🗑️ Imagen eliminada"); };
+  const hLink   = (id,v)       => { setBanners(p=>p.map(b=>b.id===id?{...b,link:v}:b)); };
+  const hFocusX = async (id,v) => { const u=banners.map(b=>b.id===id?{...b,focusX:v}:b);           await persist(u); st("✓ Foco actualizado"); };
+  const hFocusY = async (id,v) => { const u=banners.map(b=>b.id===id?{...b,focusY:v}:b);           await persist(u); st("✓ Foco actualizado"); };
+  const save    = async ()     => { await saveBanners(banners); st("✓ Guardado"); };
 
   const css = `
     .bn-card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px;transition:box-shadow .2s;}
@@ -828,7 +822,10 @@ function Banners(){
 export default function AdminApp(){
   const [logged,setLogged]=useState(false); const [section,setSection]=useState("dashboard");
   const [products,setProducts]=useState([]); const [menuOpen,setMenuOpen]=useState(false);
-  const reload=()=>setProducts(getProducts());
+  const reload = async () => {
+    const prods = await getProducts();
+    setProducts(prods);
+  };
   useEffect(()=>{
     reload();
     // Re-leer cuando el admin vuelve a estar visible (móvil)

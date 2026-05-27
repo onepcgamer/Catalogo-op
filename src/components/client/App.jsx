@@ -2,14 +2,12 @@
 // src/App.jsx  —  ONE PC · Tienda principal
 // ═══════════════════════════════════════════════════
 import { useState, useEffect, useRef, useCallback } from "react";
+import { getProducts, getBanners, getCategories, getProductComponents } from "../utils/store.js";
 
-const PROD_KEY   = "onepc_products";
-const BANNER_KEY = "onepc_banners";
-const CAT_KEY    = "onepc_categories";
+// Guard: solo corre en cliente (Astro SSR safe)
+const isBrowser = typeof window !== "undefined";
 
-function getProducts() { try { if (typeof window === 'undefined') return []; const d = localStorage.getItem(PROD_KEY);   return d ? JSON.parse(d) : []; } catch { return []; } }
-function getBanners()  { try { if (typeof window === 'undefined') return []; const d = localStorage.getItem(BANNER_KEY); return d ? JSON.parse(d) : []; } catch { return []; } }
-function getCats()     { try { if (typeof window === 'undefined') return DEFAULT_CATS; const d = localStorage.getItem(CAT_KEY);    return d ? JSON.parse(d) : DEFAULT_CATS; } catch { return DEFAULT_CATS; } }
+// datos desde Supabase via store.js
 
 const DEFAULT_CATS = [
   { id: 1, name: "Combos",      img: "https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=200&q=80", desc: "Arma tu set perfecto" },
@@ -181,13 +179,10 @@ function ProductView({ p, onBack, onAddCart }) {
 // ══════════════════════════════════════════════════════
   if (!p) return null;
 
-  const allComps = (() => {
-    try {
-      if (typeof window === "undefined" || typeof localStorage === "undefined") return {};
-      const d = localStorage.getItem("onepc_components");
-      return d ? JSON.parse(d) : {};
-    } catch { return {}; }
-  })();
+  const [allComps, setAllComps] = useState({});
+  useEffect(() => {
+    getProductComponents(p.id).then(comps => setAllComps({ [p.id]: comps }));
+  }, [p.id]);
   const comps     = allComps[p.id] || {};
   const hasComps  = Object.keys(comps).length > 0;
   const compLabels = {
@@ -886,7 +881,7 @@ function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wis
 }
 
 
-export default function App() {
+function AppInner() {
   const [view,      setView]     = useState("home");
   const [selCat,    setSelCat]   = useState("Todos");
   const [selProd,   setSelProd]  = useState(null);
@@ -906,25 +901,25 @@ export default function App() {
   // Sync con localStorage — carga inicial + eventos cross-tab
   useEffect(() => {
     // Carga inicial garantizada en cliente (Astro SSR safe)
-    const reloadAll = () => {
-      setPRODUCTS(getProducts());
-      setBanners(getBanners());
-      setCats(getCats());
+    const reloadAll = async () => {
+      const [prods, bans, cats] = await Promise.all([
+        getProducts(),
+        getBanners(),
+        getCategories(),
+      ]);
+      setPRODUCTS(prods);
+      setBanners(bans);
+      setCats(cats);
     };
-    reloadAll(); // <- carga al montar en cliente
+    reloadAll();
 
     // StorageEvent: cambios desde otras pestañas (cross-tab)
-    const hs = e => {
-      if (!e.key) { reloadAll(); return; }
-      if (e.key === PROD_KEY)   setPRODUCTS(getProducts());
-      if (e.key === BANNER_KEY) setBanners(getBanners());
-      if (e.key === CAT_KEY)    setCats(getCats());
-    };
+    const hs = () => reloadAll();
 
     // Eventos custom: cambios desde el mismo tab
-    const hp = () => setPRODUCTS(getProducts());
-    const hb = () => setBanners(getBanners());
-    const hc = () => setCats(getCats());
+    const hp = () => getProducts().then(setPRODUCTS);
+    const hb = () => getBanners().then(setBanners);
+    const hc = () => getCategories().then(setCats);
 
     // visibilitychange: cuando el usuario vuelve a esta pestaña (móvil Safari)
     const hVis = () => { if (document.visibilityState === "visible") reloadAll(); };
@@ -1490,7 +1485,10 @@ export default function App() {
   // ── CONFIGURADOR VIEW ─────────────────────────────────
   const ConfiguradorView = () => {
     const configProducts = PRODUCTS.filter(p => p.productType === "torre" || p.productType === "portatil");
-    const allComps = (() => { try { if(typeof window==="undefined")return{}; const d = localStorage.getItem("onepc_components"); return d ? JSON.parse(d) : {}; } catch { return {}; } })();
+    const [allComps, setAllComps] = useState({});
+    useEffect(() => {
+      import("../utils/store.js").then(({ getAllComponents }) => getAllComponents().then(setAllComps));
+    }, []);
     const [sel, setSel] = useState(() =>
       Object.fromEntries(configProducts.map(p => [p.id, Object.fromEntries(Object.keys(allComps[p.id] || {}).map(k => [k, 0]))]))
     );
@@ -1681,4 +1679,18 @@ export default function App() {
       )}
     </>
   );
+
+// Wrapper con guard de cliente
+}
+export default function App() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => { setIsClient(true); }, []);
+
+  if (!isClient) return <div style={{minHeight:"100vh",background:"#fff"}} />;
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  if (!mounted) return null;
+  return <AppInner />;
 }
