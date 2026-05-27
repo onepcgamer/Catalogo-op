@@ -20,20 +20,36 @@ const DEFAULT_CATS = [
   {id:6,name:"Combos",subcats:["Combo Completo","Combo Periféricos"]},
 ];
 const DEFAULT_BANNERS = [
-  {id:"hero1",label:"Banner Hero 1",img:"",imgMobile:"",activo:true,link:""},
-  {id:"hero2",label:"Banner Hero 2",img:"",imgMobile:"",activo:false,link:""},
-  {id:"hero3",label:"Banner Hero 3",img:"",imgMobile:"",activo:false,link:""},
-  {id:"promo1",label:"Banner Oferta Izquierda",img:"",imgMobile:"",activo:true,link:""},
-  {id:"promo2",label:"Banner Oferta Derecha",img:"",imgMobile:"",activo:true,link:""},
+  {id:"hero1", label:"Banner Hero 1",            img:"",imgMobile:"",activo:true, link:"",focusX:"center",focusY:"center"},
+  {id:"hero2", label:"Banner Hero 2",            img:"",imgMobile:"",activo:false,link:"",focusX:"center",focusY:"center"},
+  {id:"hero3", label:"Banner Hero 3",            img:"",imgMobile:"",activo:false,link:"",focusX:"center",focusY:"center"},
+  {id:"promo1",label:"Banner Oferta Izquierda",  img:"",imgMobile:"",activo:true, link:"",focusX:"center",focusY:"center"},
+  {id:"promo2",label:"Banner Oferta Derecha",    img:"",imgMobile:"",activo:true, link:"",focusX:"center",focusY:"center"},
 ];
+const FOCUS_X = [{v:"left",l:"← Izquierda"},{v:"center",l:"↔ Centro"},{v:"right",l:"→ Derecha"}];
+const FOCUS_Y = [{v:"top",l:"↑ Arriba"},{v:"center",l:"↕ Centro"},{v:"bottom",l:"↓ Abajo"}];
 
 const fmt        = n=>"$"+Number(n||0).toLocaleString("es-CO");
 const parsePrice = v=>Number(String(v||"").replace(/\./g,"").replace(/,/g,".").replace(/[^0-9.]/g,""))||0;
 
 function getCats()     { try{const d=localStorage.getItem(CAT_KEY);    return d?JSON.parse(d):DEFAULT_CATS;}    catch{return DEFAULT_CATS;} }
 function getBannersL() { try{const d=localStorage.getItem(BANNER_KEY); return d?JSON.parse(d):DEFAULT_BANNERS;} catch{return DEFAULT_BANNERS;} }
-function saveCats(c)     { try{localStorage.setItem(CAT_KEY,JSON.stringify(c));    window.dispatchEvent(new Event("onepc_cats_updated"));}    catch{} }
-function saveBannersL(b) { try{localStorage.setItem(BANNER_KEY,JSON.stringify(b)); window.dispatchEvent(new Event("onepc_banners_updated"));} catch{} }
+function saveCats(c) {
+  try {
+    const json = JSON.stringify(c);
+    localStorage.setItem(CAT_KEY, json);
+    window.dispatchEvent(new Event("onepc_cats_updated"));
+    window.dispatchEvent(new StorageEvent("storage", { key: CAT_KEY, newValue: json, storageArea: localStorage, url: window.location.href }));
+  } catch {}
+}
+function saveBannersL(b) {
+  try {
+    const json = JSON.stringify(b);
+    localStorage.setItem(BANNER_KEY, json);
+    window.dispatchEvent(new Event("onepc_banners_updated"));
+    window.dispatchEvent(new StorageEvent("storage", { key: BANNER_KEY, newValue: json, storageArea: localStorage, url: window.location.href }));
+  } catch {}
+}
 
 function compressImg(file, cb, maxW=800, quality=0.65) {
   const canvas=document.createElement("canvas"), ctx=canvas.getContext("2d"), img=new Image(), url=URL.createObjectURL(file);
@@ -98,9 +114,17 @@ const IcoEdit  = ()=><Ico d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v
 const IcoTrash = ({c="#ef4444"})=><Ico d="M3 6h18M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6" c={c}/>;
 const IcoPlus  = ()=><Ico d="M12 5v14M5 12h14"/>;
 const Logo = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 745 391.6" style={{height:36,width:"auto",display:"block",flexShrink:0}}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 745 391.6" style={{height:32,width:"auto",display:"block",flexShrink:0}}>
     <defs><style>{`.cls-1{fill:#ff3939}.cls-2{fill:#dc853d}.cls-3{fill:#090ff4}.cls-4{fill:#db0c09}.cls-5{fill:#cb11df}.cls-6{fill:#8bf43d}`}</style></defs>
-    <g><path className="cls-1" d="M384.9,324.4H81.9L48.5,263.2l69.2-161.3,302.2,2,35.3,58ZM91.7,307.9H374.1l62.6-144.8-26.1-42.8-282.1-1.9L66.7,262.3Z" transform="translate(-48.5 -101.9)"/><path className="cls-1" d="M288.3,280.6H177.4l-11.7-18.8,49.6-121H322l18.4,25.5ZM187.1,263.2h90.1l43.2-94.9-7.3-10.1H227l-41.8,102Z" transform="translate(-48.5 -101.9)"/><path className="cls-2" d="M316.2,493.4l141-331.1H761.4l32,65.3-90.1,90.7H593.5l-35.2-57.6h75.3l28.2-27.5-5.5-11.9H568.8L490.1,404.7ZM468,178.8,349,458.3l128.4-65.5,80.5-187.9H666.8l14.7,32-41.3,40.2H587.6l15.1,24.8h93.8l77-77.6-22.3-45.5Z" transform="translate(-48.5 -101.9)"/><polygon className="cls-3" points="88.5 337.8 147.4 337.8 125.1 391.5 66.2 391.5 88.5 337.8"/><polygon className="cls-4" points="158 337.8 216.9 337.8 194.6 391.5 135.7 391.5 158 337.8"/><polygon className="cls-5" points="226.7 337.8 285.7 337.8 263.4 391.5 204.4 391.5 226.7 337.8"/><polygon className="cls-6" points="185 272.8 243.9 272.8 221.6 326.5 162.7 326.5 185 272.8"/></g>
+    <g>
+      <path className="cls-1" d="M384.9,324.4H81.9L48.5,263.2l69.2-161.3,302.2,2,35.3,58ZM91.7,307.9H374.1l62.6-144.8-26.1-42.8-282.1-1.9L66.7,262.3Z" transform="translate(-48.5 -101.9)"/>
+      <path className="cls-1" d="M288.3,280.6H177.4l-11.7-18.8,49.6-121H322l18.4,25.5ZM187.1,263.2h90.1l43.2-94.9-7.3-10.1H227l-41.8,102Z" transform="translate(-48.5 -101.9)"/>
+      <path className="cls-2" d="M316.2,493.4l141-331.1H761.4l32,65.3-90.1,90.7H593.5l-35.2-57.6h75.3l28.2-27.5-5.5-11.9H568.8L490.1,404.7ZM468,178.8,349,458.3l128.4-65.5,80.5-187.9H666.8l14.7,32-41.3,40.2H587.6l15.1,24.8h93.8l77-77.6-22.3-45.5Z" transform="translate(-48.5 -101.9)"/>
+      <polygon className="cls-3" points="88.5 337.8 147.4 337.8 125.1 391.5 66.2 391.5 88.5 337.8"/>
+      <polygon className="cls-4" points="158 337.8 216.9 337.8 194.6 391.5 135.7 391.5 158 337.8"/>
+      <polygon className="cls-5" points="226.7 337.8 285.7 337.8 263.4 391.5 204.4 391.5 226.7 337.8"/>
+      <polygon className="cls-6" points="185 272.8 243.9 272.8 221.6 326.5 162.7 326.5 185 272.8"/>
+    </g>
   </svg>
 );
 const Toast    = ({msg})=>msg?<div className="toast">{msg}</div>:null;
@@ -651,163 +675,95 @@ function Banners(){
   const [banners,setBanners] = useState(()=>getBannersL());
   const [toast,setToast]     = useState("");
   const st  = msg => { setToast(msg); setTimeout(()=>setToast(""),2500); };
-  const refs = {};
 
   const hImg = (id,e) => {
     const file = e.target.files[0]; if(!file) return;
     compressImg(file, c => {
       const u = banners.map(b => b.id===id ? {...b, img:c, imgMobile:c} : b);
       setBanners(u); saveBannersL(u); st("✓ Banner actualizado");
-    }, 1920, 0.8);
+    }, 1920, 0.82);
   };
-  const tog  = id => { const u=banners.map(b=>b.id===id?{...b,activo:!b.activo}:b); setBanners(u); saveBannersL(u); st("✓ Estado cambiado"); };
-  const rst  = id => { const u=banners.map(b=>b.id===id?{...b,img:"",imgMobile:""}:b); setBanners(u); saveBannersL(u); st("🗑️ Imagen eliminada"); };
-  const hLink= (id,val) => setBanners(p=>p.map(b=>b.id===id?{...b,link:val}:b));
-  const save = () => { saveBannersL(banners); st("✓ Guardado"); };
+  const tog     = id      => { const u=banners.map(b=>b.id===id?{...b,activo:!b.activo}:b);        setBanners(u);saveBannersL(u);st("✓ Estado cambiado"); };
+  const rst     = id      => { const u=banners.map(b=>b.id===id?{...b,img:"",imgMobile:""}:b);      setBanners(u);saveBannersL(u);st("🗑️ Imagen eliminada"); };
+  const hLink   = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,link:v}:b);                  setBanners(u); };
+  const hFocusX = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,focusX:v}:b);                setBanners(u);saveBannersL(u);st("✓ Foco actualizado"); };
+  const hFocusY = (id,v)  => { const u=banners.map(b=>b.id===id?{...b,focusY:v}:b);                setBanners(u);saveBannersL(u);st("✓ Foco actualizado"); };
+  const save    = ()      => { saveBannersL(banners); st("✓ Guardado"); };
 
-  const bannerCss = `
-    .bn-card {
-      background:#fff;
-      border-radius:16px;
-      border:1px solid #e5e7eb;
-      overflow:hidden;
-      transition:box-shadow .2s;
-      margin-bottom:16px;
-    }
-    .bn-card:hover { box-shadow:0 4px 20px #5b21b608; }
-    .bn-preview {
-      width:100%;
-      aspect-ratio:16/5;
-      object-fit:cover;
-      object-position:center;
-      display:block;
-      background:#f3f4f6;
-    }
-    .bn-drop {
-      width:100%;
-      aspect-ratio:16/5;
-      border:2px dashed #e5e7eb;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      background:#fafafa;
-      transition:all .18s;
-      gap:6px;
-    }
-    .bn-drop:hover { border-color:#5b21b6; background:#f5f3ff; }
-    .bn-footer {
-      padding:14px 16px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-      border-top:1px solid #f0f0f0;
-      flex-wrap:wrap;
-    }
-    .bn-label {
-      font-size:13px;
-      font-weight:700;
-      color:#111;
-      flex:1;
-      min-width:0;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-    }
-    .bn-status {
-      display:flex;
-      align-items:center;
-      gap:6px;
-      font-size:11px;
-      font-weight:600;
-      padding:4px 10px;
-      border-radius:20px;
-      cursor:pointer;
-      border:none;
-      transition:all .18s;
-      flex-shrink:0;
-    }
-    .bn-status.on  { background:#dcfce7; color:#16a34a; }
-    .bn-status.off { background:#f3f4f6; color:#9ca3af; }
-    .bn-status:hover { opacity:.8; }
-    .bn-link-row {
-      padding:0 16px 14px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .bn-link-row input {
-      flex:1;
-      border:1px solid #e5e7eb;
-      border-radius:8px;
-      padding:7px 12px;
-      font-size:12px;
-      outline:none;
-      font-family:inherit;
-      color:#374151;
-      transition:border-color .18s;
-    }
-    .bn-link-row input:focus { border-color:#5b21b6; }
-    .bn-section-title {
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:12px;
-    }
-    .bn-grid {
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:24px;
-    }
-    @media(max-width:768px){ .bn-grid{ grid-template-columns:1fr; } }
+  const css = `
+    .bn-card{background:#fff;border-radius:16px;border:1px solid #e5e7eb;overflow:hidden;margin-bottom:16px;transition:box-shadow .2s;}
+    .bn-card:hover{box-shadow:0 4px 24px #5b21b60a;}
+    .bn-img{width:100%;aspect-ratio:16/5;object-fit:cover;display:block;background:#f3f4f6;}
+    .bn-drop{width:100%;aspect-ratio:16/5;border:2px dashed #e5e7eb;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:#fafafa;transition:all .18s;gap:8px;}
+    .bn-drop:hover{border-color:#5b21b6;background:#f5f3ff;}
+    .bn-overlay{position:absolute;inset:0;background:linear-gradient(to top,#00000077,transparent);opacity:0;transition:opacity .2s;display:flex;align-items:flex-end;justify-content:flex-end;padding:10px;gap:6px;}
+    .bn-overlay:hover{opacity:1;}
+    .bn-footer{padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-top:1px solid #f0f0f0;}
+    .bn-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;cursor:pointer;border:none;transition:all .18s;flex-shrink:0;}
+    .bn-pill.on{background:#dcfce7;color:#16a34a;} .bn-pill.off{background:#f3f4f6;color:#9ca3af;}
+    .bn-focus-row{padding:0 16px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+    .bn-focus-btn{border:1.5px solid #e5e7eb;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:#374151;transition:all .15s;font-family:inherit;}
+    .bn-focus-btn.sel{border-color:#5b21b6;background:#eff6ff;color:#5b21b6;}
+    .bn-link-row{padding:0 16px 14px;display:flex;align-items:center;gap:8px;}
+    .bn-link-row input{flex:1;border:1px solid #e5e7eb;border-radius:8px;padding:7px 12px;font-size:12px;outline:none;font-family:inherit;color:#374151;transition:border-color .18s;}
+    .bn-link-row input:focus{border-color:#5b21b6;}
+    .bn-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+    @media(max-width:768px){.bn-grid{grid-template-columns:1fr;}}
+    .bn-section-hd{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
   `;
 
   const BannerCard = ({b}) => {
     const ref = useRef();
+    const pos = `${b.focusX||"center"} ${b.focusY||"center"}`;
     return (
       <div className="bn-card">
         <input ref={ref} type="file" accept="image/*" onChange={e=>hImg(b.id,e)} style={{display:"none"}}/>
 
-        {/* Preview / Drop zone */}
+        {/* Preview */}
         {b.img
           ? <div style={{position:"relative"}}>
-              <img src={b.img} alt={b.label} className="bn-preview"/>
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,#00000066,transparent)",opacity:0,transition:"opacity .2s",display:"flex",alignItems:"flex-end",justifyContent:"flex-end",padding:10,gap:6}}
-                onMouseEnter={e=>e.currentTarget.style.opacity=1}
-                onMouseLeave={e=>e.currentTarget.style.opacity=0}
-              >
-                <button onClick={()=>ref.current.click()} style={{background:"#fff",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer",color:"#374151"}}>Cambiar</button>
-                <button onClick={()=>rst(b.id)} style={{background:"#ef4444",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer",color:"#fff"}}>Eliminar</button>
+              <img src={b.img} alt={b.label} className="bn-img" style={{objectPosition:pos}}/>
+              <div className="bn-overlay">
+                <button onClick={()=>ref.current.click()} style={{background:"#fff",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>Cambiar</button>
+                <button onClick={()=>rst(b.id)} style={{background:"#ef4444",color:"#fff",border:"none",borderRadius:8,padding:"6px 12px",fontSize:11,fontWeight:700,cursor:"pointer"}}>Eliminar</button>
               </div>
             </div>
           : <div className="bn-drop" onClick={()=>ref.current.click()}>
-              <div style={{width:40,height:40,borderRadius:10,background:"#f0f0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:20}}>🖼️</div>
-              <p style={{fontSize:12,fontWeight:600,color:"#6b7280"}}>Subir imagen</p>
-              <p style={{fontSize:10,color:"#9ca3af"}}>JPG, PNG, WEBP · Se adapta a todos los dispositivos</p>
+              <div style={{width:44,height:44,borderRadius:12,background:"#f0f0f0",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22}}>🖼️</div>
+              <p style={{fontSize:13,fontWeight:600,color:"#6b7280"}}>Subir imagen</p>
+              <p style={{fontSize:11,color:"#9ca3af"}}>1920×680px recomendado · JPG, PNG, WEBP</p>
             </div>
         }
 
-        {/* Footer */}
+        {/* Footer: nombre + cambiar + estado */}
         <div className="bn-footer">
-          <span className="bn-label">{b.label}</span>
-          {b.img && (
-            <button onClick={()=>ref.current.click()} className="btn btn-sm btn-outline" style={{flexShrink:0}}>📷 Cambiar</button>
-          )}
-          <button onClick={()=>tog(b.id)} className={`bn-status ${b.activo?"on":"off"}`}>
+          <span style={{fontSize:13,fontWeight:700,color:"#111",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{b.label}</span>
+          {b.img && <button onClick={()=>ref.current.click()} className="btn btn-sm btn-outline">📷 Cambiar</button>}
+          <button onClick={()=>tog(b.id)} className={`bn-pill ${b.activo?"on":"off"}`}>
             <span style={{width:6,height:6,borderRadius:"50%",background:b.activo?"#16a34a":"#9ca3af",display:"inline-block"}}/>
             {b.activo?"Activo":"Inactivo"}
           </button>
         </div>
 
+        {/* Foco visual — solo si tiene imagen */}
+        {b.img && (
+          <div className="bn-focus-row">
+            <span style={{fontSize:11,fontWeight:600,color:"#9ca3af",flexShrink:0}}>Foco:</span>
+            {FOCUS_X.map(f=>(
+              <button key={f.v} className={`bn-focus-btn${(b.focusX||"center")===f.v?" sel":""}`} onClick={()=>hFocusX(b.id,f.v)}>{f.l}</button>
+            ))}
+            <span style={{fontSize:11,color:"#e5e7eb"}}>|</span>
+            {FOCUS_Y.map(f=>(
+              <button key={f.v} className={`bn-focus-btn${(b.focusY||"center")===f.v?" sel":""}`} onClick={()=>hFocusY(b.id,f.v)}>{f.l}</button>
+            ))}
+          </div>
+        )}
+
         {/* Link */}
         <div className="bn-link-row">
           <span style={{fontSize:11,color:"#9ca3af",flexShrink:0}}>🔗</span>
-          <input
-            placeholder="Link al hacer clic (opcional)"
-            value={b.link}
-            onChange={e=>hLink(b.id,e.target.value)}
-          />
+          <input placeholder="Link al hacer clic (opcional)" value={b.link} onChange={e=>hLink(b.id,e.target.value)}/>
+          {b.link && <button className="btn btn-sm btn-blue" onClick={save}>Guardar</button>}
         </div>
       </div>
     );
@@ -818,44 +774,47 @@ function Banners(){
 
   return(
     <div>
-      <style>{bannerCss}</style>
+      <style>{css}</style>
       <Toast msg={toast}/>
-
-      {/* Header */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:24}}>
         <div>
           <h2 style={{fontSize:18,fontWeight:800}}>Banners</h2>
-          <p style={{fontSize:13,color:"#6b7280",marginTop:2}}>Una imagen se adapta a desktop, tablet y móvil automáticamente</p>
+          <p style={{fontSize:13,color:"#6b7280",marginTop:2}}>Una imagen · Responsive automático · Control de foco visual</p>
         </div>
-        <button className="btn btn-blue" onClick={save} style={{gap:6,display:"flex",alignItems:"center"}}>
-          💾 Guardar links
-        </button>
+        <button className="btn btn-blue" onClick={save}>💾 Guardar todo</button>
       </div>
 
       <div className="bn-grid">
-        {/* Hero banners */}
         <div>
-          <div className="bn-section-title">
+          <div className="bn-section-hd">
             <div style={{width:3,height:18,background:"#5b21b6",borderRadius:2}}/>
             <h3 style={{fontSize:14,fontWeight:700}}>Hero Slider</h3>
-            <span style={{fontSize:11,color:"#9ca3af",background:"#f3f4f6",padding:"2px 8px",borderRadius:10}}>{heroB.length} banners</span>
+            <span style={{fontSize:11,color:"#9ca3af",background:"#f3f4f6",padding:"2px 8px",borderRadius:10}}>{heroB.length}</span>
           </div>
           {heroB.map(b=><BannerCard key={b.id} b={b}/>)}
         </div>
-
-        {/* Promo banners */}
         <div>
-          <div className="bn-section-title">
+          <div className="bn-section-hd">
             <div style={{width:3,height:18,background:"#f97316",borderRadius:2}}/>
             <h3 style={{fontSize:14,fontWeight:700}}>Promocionales</h3>
-            <span style={{fontSize:11,color:"#9ca3af",background:"#f3f4f6",padding:"2px 8px",borderRadius:10}}>{promoB.length} banners</span>
+            <span style={{fontSize:11,color:"#9ca3af",background:"#f3f4f6",padding:"2px 8px",borderRadius:10}}>{promoB.length}</span>
           </div>
           {promoB.map(b=><BannerCard key={b.id} b={b}/>)}
-
-          {/* Tip */}
-          <div style={{background:"#f9fafb",borderRadius:12,padding:"12px 14px",border:"1px solid #e5e7eb",marginTop:4}}>
-            <p style={{fontSize:12,fontWeight:700,color:"#374151",marginBottom:4}}>💡 Cómo funciona</p>
-            <p style={{fontSize:11,color:"#6b7280",lineHeight:1.6}}>Sube una sola imagen de buena resolución. El sistema la recorta y adapta automáticamente para desktop, tablet y móvil usando <code style={{background:"#f0f0f0",padding:"1px 4px",borderRadius:4,fontSize:10}}>object-fit: cover</code>.</p>
+          <div style={{background:"#f9fafb",borderRadius:12,padding:"14px 16px",border:"1px solid #e5e7eb",marginTop:8}}>
+            <p style={{fontSize:12,fontWeight:700,color:"#374151",marginBottom:8}}>💡 Sistema inteligente de recorte</p>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {[
+                ["1 sola imagen","Se adapta a desktop, tablet y móvil"],
+                ["Foco visual","Define dónde enfocar al recortar en móvil"],
+                ["object-fit: cover","Sin deformación, siempre proporcional"],
+                ["Resolución óptima","Sube imágenes de mínimo 1920×680px"],
+              ].map(([t,d])=>(
+                <div key={t} style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+                  <span style={{color:"#22c55e",fontSize:12,flexShrink:0}}>✓</span>
+                  <p style={{fontSize:11,color:"#6b7280",lineHeight:1.5}}><strong style={{color:"#374151"}}>{t}</strong> — {d}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -870,8 +829,17 @@ export default function AdminApp(){
   const [logged,setLogged]=useState(false); const [section,setSection]=useState("dashboard");
   const [products,setProducts]=useState([]); const [menuOpen,setMenuOpen]=useState(false);
   const reload=()=>setProducts(getProducts());
-  useEffect(()=>{reload();},[]);
-  useEffect(()=>{window.addEventListener("onepc_updated",reload);return()=>window.removeEventListener("onepc_updated",reload);},[]);
+  useEffect(()=>{
+    reload();
+    // Re-leer cuando el admin vuelve a estar visible (móvil)
+    const hVis = () => { if(document.visibilityState==="visible") reload(); };
+    document.addEventListener("visibilitychange", hVis);
+    window.addEventListener("onepc_updated", reload);
+    return()=>{
+      document.removeEventListener("visibilitychange", hVis);
+      window.removeEventListener("onepc_updated",reload);
+    };
+  },[]);
   const navItems=[
     {id:"dashboard", label:"Dashboard",  icon:"M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"},
     {id:"inventory", label:"Inventario", icon:"M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8"},

@@ -3,11 +3,18 @@ import AdminApp from '../../components/admin/AdminApp.jsx';
 ---
 <html lang="es">
   <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>ONE PC - Admin</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ONE PC — Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      html, body { overflow-x: hidden; }
+      body { margin: 0; padding: 0; background: #f3f4f6; }
+    </style>
   </head>
-  <body style="margin:0;padding:0;">
-    <AdminApp client:load />
+  <body>
+    <AdminApp client:only="react" />
   </body>
 </html>

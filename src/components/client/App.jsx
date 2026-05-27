@@ -1,15 +1,15 @@
 // ═══════════════════════════════════════════════════
 // src/App.jsx  —  ONE PC · Tienda principal
 // ═══════════════════════════════════════════════════
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 const PROD_KEY   = "onepc_products";
 const BANNER_KEY = "onepc_banners";
 const CAT_KEY    = "onepc_categories";
 
-function getProducts() { try { const d = localStorage.getItem(PROD_KEY);   return d ? JSON.parse(d) : []; } catch { return []; } }
-function getBanners()  { try { const d = localStorage.getItem(BANNER_KEY); return d ? JSON.parse(d) : []; } catch { return []; } }
-function getCats()     { try { const d = localStorage.getItem(CAT_KEY);    return d ? JSON.parse(d) : DEFAULT_CATS; } catch { return DEFAULT_CATS; } }
+function getProducts() { try { if (typeof window === 'undefined') return []; const d = localStorage.getItem(PROD_KEY);   return d ? JSON.parse(d) : []; } catch { return []; } }
+function getBanners()  { try { if (typeof window === 'undefined') return []; const d = localStorage.getItem(BANNER_KEY); return d ? JSON.parse(d) : []; } catch { return []; } }
+function getCats()     { try { if (typeof window === 'undefined') return DEFAULT_CATS; const d = localStorage.getItem(CAT_KEY);    return d ? JSON.parse(d) : DEFAULT_CATS; } catch { return DEFAULT_CATS; } }
 
 const DEFAULT_CATS = [
   { id: 1, name: "Combos",      img: "https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=200&q=80", desc: "Arma tu set perfecto" },
@@ -41,7 +41,8 @@ const openWA = msg => window.open(`https://wa.me/${WA}?text=${encodeURIComponent
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; }
+  html { overflow-x: hidden; }
+  body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; overflow-x: hidden; max-width: 100%; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
   .btn-primary  { background: #5b21b6; color: #fff; border: none; border-radius: 8px; padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; font-family: 'Poppins', sans-serif; }
@@ -62,14 +63,14 @@ const css = `
   .nav-link:hover { color: #fff; }
   .nav-link.active { color: #a78bfa; font-weight: 700; }
   .badge-discount { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 4px; position: absolute; top: 10px; left: 10px; }
-  .review-card  { background: #fff; border: 1.5px solid #f0f0f0; border-radius: 14px; padding: 20px; flex: 1; min-width: 260px; }
+  .review-card  { background: #fff; border: 1.5px solid #f0f0f0; border-radius: 14px; padding: 20px; flex: 1; min-width: 0; width: 100%; }
   .footer-col h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: #fff; }
   .footer-link  { font-size: 13px; color: #9ca3af; cursor: pointer; margin-bottom: 8px; display: block; transition: color .18s; }
   .footer-link:hover { color: #fff; }
   .input-field  { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 11px 14px; font-size: 13px; outline: none; transition: border-color .18s; font-family: 'Poppins', sans-serif; }
   .input-field:focus { border-color: #5b21b6; }
   /* WhatsApp FAB */
-  .wa-fab { position: fixed; bottom: 28px; right: 28px; z-index: 999; cursor: pointer; transition: transform .25s, box-shadow .25s; width: 56px; height: 56px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px #25d36655; }
+  .wa-fab { position: fixed; bottom: 24px; right: 20px; z-index: 999; cursor: pointer; transition: transform .25s, box-shadow .25s; width: 52px; height: 52px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px #25d36655; max-width: 52px; }
   .wa-fab:hover { transform: scale(1.12); box-shadow: 0 8px 32px #25d36688; }
   @media (max-width: 768px) {
     .hide-mobile  { display: none !important; }
@@ -78,7 +79,7 @@ const css = `
     .promo-grid   { grid-template-columns: 1fr !important; }
     .footer-grid  { grid-template-columns: 1fr !important; gap: 20px !important; }
     .brands-row   { gap: 12px !important; justify-content: center !important; flex-wrap: wrap !important; }
-    .reviews-row  { flex-direction: column !important; }
+    .reviews-row  { flex-direction: column !important; overflow: hidden !important; }
     .benefits-row { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
     .cart-layout  { grid-template-columns: 1fr !important; }
     .product-grid-2col { grid-template-columns: 1fr !important; gap: 20px !important; }
@@ -127,9 +128,17 @@ const Stars = ({ r, s = 14 }) => (
 );
 
 const Logo = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 745 391.6" style={{height:36,width:"auto",display:"block",flexShrink:0}}>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 745 391.6" style={{height:38,width:"auto",display:"block",flexShrink:0}}>
     <defs><style>{`.cls-1{fill:#ff3939}.cls-2{fill:#dc853d}.cls-3{fill:#090ff4}.cls-4{fill:#db0c09}.cls-5{fill:#cb11df}.cls-6{fill:#8bf43d}`}</style></defs>
-    <g><path className="cls-1" d="M384.9,324.4H81.9L48.5,263.2l69.2-161.3,302.2,2,35.3,58ZM91.7,307.9H374.1l62.6-144.8-26.1-42.8-282.1-1.9L66.7,262.3Z" transform="translate(-48.5 -101.9)"/><path className="cls-1" d="M288.3,280.6H177.4l-11.7-18.8,49.6-121H322l18.4,25.5ZM187.1,263.2h90.1l43.2-94.9-7.3-10.1H227l-41.8,102Z" transform="translate(-48.5 -101.9)"/><path className="cls-2" d="M316.2,493.4l141-331.1H761.4l32,65.3-90.1,90.7H593.5l-35.2-57.6h75.3l28.2-27.5-5.5-11.9H568.8L490.1,404.7ZM468,178.8,349,458.3l128.4-65.5,80.5-187.9H666.8l14.7,32-41.3,40.2H587.6l15.1,24.8h93.8l77-77.6-22.3-45.5Z" transform="translate(-48.5 -101.9)"/><polygon className="cls-3" points="88.5 337.8 147.4 337.8 125.1 391.5 66.2 391.5 88.5 337.8"/><polygon className="cls-4" points="158 337.8 216.9 337.8 194.6 391.5 135.7 391.5 158 337.8"/><polygon className="cls-5" points="226.7 337.8 285.7 337.8 263.4 391.5 204.4 391.5 226.7 337.8"/><polygon className="cls-6" points="185 272.8 243.9 272.8 221.6 326.5 162.7 326.5 185 272.8"/></g>
+    <g>
+      <path className="cls-1" d="M384.9,324.4H81.9L48.5,263.2l69.2-161.3,302.2,2,35.3,58ZM91.7,307.9H374.1l62.6-144.8-26.1-42.8-282.1-1.9L66.7,262.3Z" transform="translate(-48.5 -101.9)"/>
+      <path className="cls-1" d="M288.3,280.6H177.4l-11.7-18.8,49.6-121H322l18.4,25.5ZM187.1,263.2h90.1l43.2-94.9-7.3-10.1H227l-41.8,102Z" transform="translate(-48.5 -101.9)"/>
+      <path className="cls-2" d="M316.2,493.4l141-331.1H761.4l32,65.3-90.1,90.7H593.5l-35.2-57.6h75.3l28.2-27.5-5.5-11.9H568.8L490.1,404.7ZM468,178.8,349,458.3l128.4-65.5,80.5-187.9H666.8l14.7,32-41.3,40.2H587.6l15.1,24.8h93.8l77-77.6-22.3-45.5Z" transform="translate(-48.5 -101.9)"/>
+      <polygon className="cls-3" points="88.5 337.8 147.4 337.8 125.1 391.5 66.2 391.5 88.5 337.8"/>
+      <polygon className="cls-4" points="158 337.8 216.9 337.8 194.6 391.5 135.7 391.5 158 337.8"/>
+      <polygon className="cls-5" points="226.7 337.8 285.7 337.8 263.4 391.5 204.4 391.5 226.7 337.8"/>
+      <polygon className="cls-6" points="185 272.8 243.9 272.8 221.6 326.5 162.7 326.5 185 272.8"/>
+    </g>
   </svg>
 );
 
@@ -173,8 +182,11 @@ function ProductView({ p, onBack, onAddCart }) {
   if (!p) return null;
 
   const allComps = (() => {
-    try { const d = localStorage.getItem("onepc_components"); return d ? JSON.parse(d) : {}; }
-    catch { return {}; }
+    try {
+      if (typeof window === "undefined" || typeof localStorage === "undefined") return {};
+      const d = localStorage.getItem("onepc_components");
+      return d ? JSON.parse(d) : {};
+    } catch { return {}; }
   })();
   const comps     = allComps[p.id] || {};
   const hasComps  = Object.keys(comps).length > 0;
@@ -553,6 +565,327 @@ function ProductView({ p, onBack, onAddCart }) {
     </div>
   );
 }
+// ── CATEGORY VIEW — standalone (fuera de App para evitar reset de estado)
+// ── PRICE RANGE SLIDER — standalone, sin inputs superpuestos ─────────────────
+function PriceSlider({ min, max, valueMin, valueMax, onChange, fmt }) {
+  const trackRef = useRef(null);
+  const [dragging, setDragging] = useState(null); // "min" | "max" | null
+
+  const pct = v => max > min ? ((v - min) / (max - min)) * 100 : 0;
+
+  const valueFromEvent = (e) => {
+    const rect = trackRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const step = Math.max(1000, Math.round((max - min) / 100));
+    return Math.round((min + ratio * (max - min)) / step) * step;
+  };
+
+  const startDrag = (thumb, e) => {
+    e.preventDefault();
+    setDragging(thumb);
+  };
+
+  useEffect(() => {
+    if (!dragging) return;
+
+    const onMove = (e) => {
+      const v = valueFromEvent(e);
+      if (dragging === "min" && v < valueMax) onChange(v, valueMax);
+      if (dragging === "max" && v > valueMin) onChange(valueMin, v);
+    };
+    const onUp = () => setDragging(null);
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [dragging, valueMin, valueMax]);
+
+  const lPct = pct(valueMin);
+  const rPct = pct(valueMax);
+
+  const thumbStyle = (active) => ({
+    position: "absolute",
+    top: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 22,
+    height: 22,
+    borderRadius: "50%",
+    background: "#5b21b6",
+    border: "3px solid #fff",
+    boxShadow: active ? "0 0 0 3px #5b21b644, 0 2px 8px #5b21b655" : "0 2px 6px #5b21b644",
+    cursor: "grab",
+    touchAction: "none",
+    userSelect: "none",
+    transition: "box-shadow .15s",
+    zIndex: 2,
+  });
+
+  return (
+    <div style={{ padding: "4px 11px 0" }}>
+      {/* Valores */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
+        <div>
+          <p style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>Mínimo</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#5b21b6" }}>{fmt(valueMin)}</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ fontSize: 10, color: "#9ca3af", marginBottom: 2 }}>Máximo</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: "#5b21b6" }}>{fmt(valueMax)}</p>
+        </div>
+      </div>
+
+      {/* Track */}
+      <div
+        ref={trackRef}
+        style={{ position: "relative", height: 4, background: "#e5e7eb", borderRadius: 2, margin: "11px 0" }}
+        onClick={(e) => {
+          // Click en el track: mover el thumb más cercano
+          const v = valueFromEvent(e);
+          const distMin = Math.abs(v - valueMin);
+          const distMax = Math.abs(v - valueMax);
+          if (distMin <= distMax && v < valueMax) onChange(v, valueMax);
+          else if (v > valueMin) onChange(valueMin, v);
+        }}
+      >
+        {/* Fill */}
+        <div style={{
+          position: "absolute", height: 4, background: "#5b21b6", borderRadius: 2,
+          left: lPct + "%", width: (rPct - lPct) + "%",
+        }} />
+
+        {/* Thumb mínimo */}
+        <div
+          style={{ ...thumbStyle(dragging === "min"), left: lPct + "%" }}
+          onMouseDown={(e) => startDrag("min", e)}
+          onTouchStart={(e) => startDrag("min", e)}
+        />
+        {/* Thumb máximo */}
+        <div
+          style={{ ...thumbStyle(dragging === "max"), left: rPct + "%" }}
+          onMouseDown={(e) => startDrag("max", e)}
+          onTouchStart={(e) => startDrag("max", e)}
+        />
+      </div>
+
+      {/* Extremos */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
+        <span style={{ fontSize: 10, color: "#c4b5fd" }}>{fmt(min)}</span>
+        <span style={{ fontSize: 10, color: "#c4b5fd" }}>{fmt(max)}</span>
+      </div>
+    </div>
+  );
+}
+
+function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wish, toggleWish, fmt, openWA }) {
+  const [filterBrands, setFilterBrands] = useState([]);
+  const [rangeMin,     setRangeMin]     = useState(0);
+  const [rangeMax,     setRangeMax]     = useState(0);
+  const [rangeReady,   setRangeReady]   = useState(false);
+  const [sortBy,       setSortBy]       = useState("default");
+  const [filterOpen,   setFilterOpen]   = useState(false);
+
+  const baseProd    = PRODUCTS.filter(p => selCat === "Todos" || p.category === selCat);
+  const availBrands = [...new Set(baseProd.map(p => p.brand).filter(Boolean))].sort();
+  const minPriceAll = baseProd.length ? Math.min(...baseProd.map(p => p.price)) : 0;
+  const maxPriceAll = baseProd.length ? Math.max(...baseProd.map(p => p.price)) : 0;
+
+  // Reset cuando cambia categoría
+  useEffect(() => {
+    setFilterBrands([]);
+    setRangeReady(false);
+    setRangeMin(0);
+    setRangeMax(0);
+    setSortBy("default");
+  }, [selCat]);
+
+  // Init sliders
+  useEffect(() => {
+    if (!rangeReady && maxPriceAll > 0) {
+      setRangeMin(minPriceAll);
+      setRangeMax(maxPriceAll);
+      setRangeReady(true);
+    }
+  }, [maxPriceAll, minPriceAll, rangeReady]);
+
+  const toggleBrand  = b => setFilterBrands(prev => prev.includes(b) ? prev.filter(x => x !== b) : [...prev, b]);
+  const clearFilters = () => { setFilterBrands([]); setRangeMin(minPriceAll); setRangeMax(maxPriceAll); setSortBy("default"); setRangeReady(true); };
+
+  const priceFiltered = rangeReady && (rangeMin > minPriceAll || rangeMax < maxPriceAll);
+  const activeFilters = filterBrands.length + (priceFiltered ? 1 : 0);
+
+  let result = baseProd.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.brand?.toLowerCase().includes(search.toLowerCase());
+    const matchBrand  = filterBrands.length === 0 || filterBrands.includes(p.brand);
+    const matchMin    = !rangeReady || p.price >= rangeMin;
+    const matchMax    = !rangeReady || p.price <= rangeMax;
+    return matchSearch && matchBrand && matchMin && matchMax;
+  });
+
+  if (sortBy === "asc")      result = [...result].sort((a,b) => a.price - b.price);
+  if (sortBy === "desc")     result = [...result].sort((a,b) => b.price - a.price);
+  if (sortBy === "discount") result = [...result].sort((a,b) => (b.discount||0) - (a.discount||0));
+  if (sortBy === "name")     result = [...result].sort((a,b) => a.name.localeCompare(b.name));
+
+  const CSS = [
+    ".cat-sidebar{width:240px;flex-shrink:0;}",
+    ".filter-section{border-bottom:1px solid #f0f0f0;padding-bottom:18px;margin-bottom:18px;}",
+    ".filter-section:last-child{border-bottom:none;}",
+    ".brand-chip{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;}",
+    ".brand-chip input{width:16px;height:16px;accent-color:#5b21b6;cursor:pointer;flex-shrink:0;}",
+    ".brand-chip label{font-size:13px;color:#374151;cursor:pointer;flex:1;}",
+    ".brand-chip label:hover{color:#5b21b6;}",
+    ".sort-sel{width:100%;border:1.5px solid #e5e7eb;border-radius:8px;padding:8px 12px;font-size:13px;outline:none;font-family:'Poppins',sans-serif;background:#fff;cursor:pointer;}",
+    ".filter-drawer{position:fixed;inset:0;z-index:200;display:flex;}",
+    ".filter-panel{background:#fff;width:300px;max-width:90vw;height:100%;overflow-y:auto;padding:24px;box-shadow:4px 0 24px rgba(0,0,0,0.08);}",
+    "@media(max-width:900px){.cat-sidebar{display:none;}}",
+    "@media(min-width:901px){.filter-drawer{display:none!important;}}",
+  ].join(" ")
+
+  // Sidebar JSX — inline, no sub-component para evitar remount
+  const sidebarJSX = (
+    <>
+      {/* Ordenar */}
+      <div className="filter-section">
+        <p style={{fontSize:12,fontWeight:700,color:"#374151",textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>Ordenar por</p>
+        <select className="sort-sel" value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+          <option value="default">Relevancia</option>
+          <option value="asc">Precio: menor a mayor</option>
+          <option value="desc">Precio: mayor a menor</option>
+          <option value="discount">Mayor descuento</option>
+          <option value="name">Nombre A-Z</option>
+        </select>
+      </div>
+
+      {/* Precio */}
+      {maxPriceAll > 0 && (
+        <div className="filter-section">
+          <p style={{fontSize:12,fontWeight:700,color:"#374151",textTransform:"uppercase",letterSpacing:.8,marginBottom:14}}>Precio</p>
+          <PriceSlider
+            min={minPriceAll} max={maxPriceAll}
+            valueMin={rangeMin} valueMax={rangeMax}
+            fmt={fmt}
+            onChange={(newMin, newMax) => { setRangeMin(newMin); setRangeMax(newMax); }}
+          />
+        </div>
+      )}
+
+      {/* Marcas */}
+      {availBrands.length > 0 && (
+        <div className="filter-section">
+          <p style={{fontSize:12,fontWeight:700,color:"#374151",textTransform:"uppercase",letterSpacing:.8,marginBottom:10}}>Marca</p>
+          {availBrands.map(b => (
+            <div key={b} className="brand-chip">
+              <input type="checkbox" id={"brand-"+b} checked={filterBrands.includes(b)} onChange={()=>toggleBrand(b)}/>
+              <label htmlFor={"brand-"+b}>{b}</label>
+              <span style={{fontSize:11,color:"#9ca3af"}}>({baseProd.filter(p=>p.brand===b).length})</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Limpiar */}
+      {activeFilters > 0 && (
+        <button onClick={clearFilters} style={{width:"100%",background:"#fee2e2",color:"#dc2626",border:"none",borderRadius:8,padding:"9px 0",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Poppins',sans-serif",marginTop:4}}>
+          Limpiar filtros ({activeFilters})
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <div style={{minHeight:"100vh"}}>
+      <style>{CSS}</style>
+
+      {/* Drawer móvil */}
+      {filterOpen && (
+        <div className="filter-drawer">
+          <div className="filter-panel">
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+              <p style={{fontSize:15,fontWeight:800}}>Filtros</p>
+              <button onClick={()=>setFilterOpen(false)} style={{background:"none",border:"none",fontSize:22,cursor:"pointer"}}>✕</button>
+            </div>
+            {sidebarJSX}
+          </div>
+          <div style={{flex:1,background:"#00000055"}} onClick={()=>setFilterOpen(false)}/>
+        </div>
+      )}
+
+      {/* Breadcrumb */}
+      <div style={{background:"#fff",borderBottom:"1px solid #e5e7eb",padding:"14px 24px",display:"flex",alignItems:"center",gap:12,position:"sticky",top:60,zIndex:50}}>
+        <button onClick={goHome} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:6,color:"#374151",fontWeight:600,fontSize:14,fontFamily:"'Poppins',sans-serif"}}>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+          Inicio
+        </button>
+        <span style={{color:"#e5e7eb"}}>/</span>
+        <span style={{fontSize:14,fontWeight:700,color:"#5b21b6"}}>{selCat==="Todos"?"Todos los productos":selCat}</span>
+        <span style={{fontSize:13,color:"#9ca3af"}}>({result.length})</span>
+        <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center"}}>
+          {activeFilters > 0 && <span style={{background:"#5b21b6",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10}}>{activeFilters} filtros</span>}
+          <button onClick={()=>setFilterOpen(true)} className="hide-desktop" style={{background:"#f3f4f6",border:"none",borderRadius:8,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Poppins',sans-serif"}}>
+            ⚙️ Filtros{activeFilters > 0 ? " ("+activeFilters+")" : ""}
+          </button>
+        </div>
+      </div>
+
+      {/* Layout */}
+      <div style={{maxWidth:1280,margin:"0 auto",padding:"24px",display:"flex",gap:28,alignItems:"flex-start"}}>
+
+        {/* Sidebar desktop */}
+        <div className="cat-sidebar">
+          <div style={{background:"#fff",borderRadius:14,border:"1px solid #e5e7eb",padding:"20px"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+              <p style={{fontSize:14,fontWeight:800}}>Filtros</p>
+              {activeFilters > 0 && <button onClick={clearFilters} style={{fontSize:11,color:"#5b21b6",background:"none",border:"none",cursor:"pointer",fontWeight:600,fontFamily:"'Poppins',sans-serif"}}>Limpiar</button>}
+            </div>
+            {sidebarJSX}
+          </div>
+        </div>
+
+        {/* Productos */}
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}} className="hide-mobile">
+            <p style={{fontSize:13,color:"#6b7280"}}><strong style={{color:"#111"}}>{result.length}</strong> productos encontrados</p>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:13,color:"#6b7280"}}>Ordenar:</span>
+              <select className="sort-sel" style={{width:"auto"}} value={sortBy} onChange={e=>setSortBy(e.target.value)}>
+                <option value="default">Relevancia</option>
+                <option value="asc">Precio ↑</option>
+                <option value="desc">Precio ↓</option>
+                <option value="discount">Mayor descuento</option>
+                <option value="name">Nombre A-Z</option>
+              </select>
+            </div>
+          </div>
+
+          {result.length === 0 ? (
+            <div style={{textAlign:"center",padding:80,color:"#9ca3af"}}>
+              <div style={{fontSize:48,marginBottom:12}}>🔍</div>
+              <p style={{fontSize:16,fontWeight:600,marginBottom:8}}>Sin resultados</p>
+              <p style={{fontSize:13,marginBottom:20}}>Prueba con otros filtros</p>
+              <button onClick={clearFilters} style={{background:"#5b21b6",color:"#fff",border:"none",borderRadius:8,padding:"10px 24px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Poppins',sans-serif"}}>Limpiar filtros</button>
+            </div>
+          ) : (
+            <div className="prod-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
+              {result.map(p => (
+                <ProductCard key={p.id} p={p} onOpen={openProd} onAdd={addCart} wish={wish} onWish={toggleWish}/>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function App() {
   const [view,      setView]     = useState("home");
   const [selCat,    setSelCat]   = useState("Todos");
@@ -566,34 +899,61 @@ export default function App() {
   const [toast,     setToast]    = useState("");
   const [email,     setEmail]    = useState("");
   const [onlyStock, setOnlyStock]= useState(false);
-  const [PRODUCTS,  setPRODUCTS] = useState(() => getProducts());
-  const [banners,   setBanners]  = useState(() => getBanners());
-  const [cats,      setCats]     = useState(() => getCats());
+  const [PRODUCTS,  setPRODUCTS] = useState([]);
+  const [banners,   setBanners]  = useState([]);
+  const [cats,      setCats]     = useState(DEFAULT_CATS);
 
-  // Sync con localStorage en tiempo real
+  // Sync con localStorage — carga inicial + eventos cross-tab
   useEffect(() => {
+    // Carga inicial garantizada en cliente (Astro SSR safe)
+    const reloadAll = () => {
+      setPRODUCTS(getProducts());
+      setBanners(getBanners());
+      setCats(getCats());
+    };
+    reloadAll(); // <- carga al montar en cliente
+
+    // StorageEvent: cambios desde otras pestañas (cross-tab)
     const hs = e => {
+      if (!e.key) { reloadAll(); return; }
       if (e.key === PROD_KEY)   setPRODUCTS(getProducts());
       if (e.key === BANNER_KEY) setBanners(getBanners());
       if (e.key === CAT_KEY)    setCats(getCats());
     };
+
+    // Eventos custom: cambios desde el mismo tab
     const hp = () => setPRODUCTS(getProducts());
     const hb = () => setBanners(getBanners());
     const hc = () => setCats(getCats());
-    window.addEventListener("storage",              hs);
-    window.addEventListener("onepc_updated",        hp);
-    window.addEventListener("onepc_banners_updated",hb);
-    window.addEventListener("onepc_cats_updated",   hc);
+
+    // visibilitychange: cuando el usuario vuelve a esta pestaña (móvil Safari)
+    const hVis = () => { if (document.visibilityState === "visible") reloadAll(); };
+
+    // focus: cuando la ventana gana foco (desktop, Android)
+    const hFocus = () => reloadAll();
+
+    window.addEventListener("storage",               hs);
+    window.addEventListener("onepc_updated",         hp);
+    window.addEventListener("onepc_banners_updated", hb);
+    window.addEventListener("onepc_cats_updated",    hc);
+    document.addEventListener("visibilitychange",    hVis);
+    window.addEventListener("focus",                 hFocus);
+
+    // Leer al montar — por si ya había datos guardados
+    reloadAll();
+
     return () => {
-      window.removeEventListener("storage",              hs);
-      window.removeEventListener("onepc_updated",        hp);
-      window.removeEventListener("onepc_banners_updated",hb);
-      window.removeEventListener("onepc_cats_updated",   hc);
+      window.removeEventListener("storage",               hs);
+      window.removeEventListener("onepc_updated",         hp);
+      window.removeEventListener("onepc_banners_updated", hb);
+      window.removeEventListener("onepc_cats_updated",    hc);
+      document.removeEventListener("visibilitychange",    hVis);
+      window.removeEventListener("focus",                 hFocus);
     };
   }, []);
 
   const heroBanners = banners.filter(b => b.id?.startsWith("hero") && b.activo && b.img);
-  const heroData    = heroBanners.length > 0 ? heroBanners.map((b, i) => ({ ...DEFAULT_HERO[i % 3], img: b.img })) : DEFAULT_HERO;
+  const heroData    = heroBanners.length > 0 ? heroBanners.map((b, i) => ({ ...DEFAULT_HERO[i % 3], img: b.img, focusX: b.focusX||'center', focusY: b.focusY||'center' })) : DEFAULT_HERO.map(h=>({...h,focusX:'center',focusY:'center'}));
   const CATEGORIES  = cats.length > 0
     ? cats.map(c => ({ name: c.name, img: c.img || DEFAULT_CATS.find(d => d.name === c.name)?.img || DEFAULT_CATS[0].img, desc: c.desc || DEFAULT_CATS.find(d => d.name === c.name)?.desc || "" }))
     : DEFAULT_CATS;
@@ -716,7 +1076,7 @@ export default function App() {
   // ── MOBILE MENU ───────────────────────────────────────
   const MobileMenu = () => (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex" }}>
-      <div style={{ background: "#0f0f0f", width: 260, padding: 24, display: "flex", flexDirection: "column", gap: 4, overflowY: "auto" }}>
+      <div style={{ background: "#0f0f0f", width: 260, maxWidth: "85vw", padding: 24, display: "flex", flexDirection: "column", gap: 4, overflowY: "auto", overflowX: "hidden" }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
           <Logo />
           <button onClick={() => setMenu(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 22, cursor: "pointer" }}>✕</button>
@@ -747,60 +1107,53 @@ export default function App() {
   // ── HOME VIEW ─────────────────────────────────────────
   const HomeView = () => (
     <div>
-      {/* HERO SLIDER */}
-      <div className="hero-wrap" style={{ height: "75vh", minHeight: 560, position: "relative", overflow: "hidden", background: "#0a0a0f" }}>
-        <div style={{ position: "absolute", inset: 0, display: "flex", transition: "transform .7s cubic-bezier(.77,0,.18,1)", transform: `translateX(-${heroSlide * 100}%)` }}>
+      {/* HERO SLIDER — imagen limpia, sin texto superpuesto */}
+      <div className="hero-wrap" style={{ position: "relative", overflow: "hidden", background: "#000", width: "100%" }}>
+        <style>{`
+          .hero-wrap { height: 55vw; min-height: 320px; max-height: 680px; width: 100%; max-width: 100%; }
+          @media(max-width:768px){ .hero-wrap{ height: 72vw; min-height: 260px; max-height: 520px; } }
+          .hero-img { width:100%; height:100%; object-fit:cover; display:block; }
+          .hero-arrow { position:absolute; top:50%; transform:translateY(-50%); background:#00000055; border:none; color:#fff; font-size:24px; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .18s; backdrop-filter:blur(4px); }
+          .hero-arrow:hover { background:#00000099; }
+        `}</style>
+
+        {/* Track */}
+        <div style={{ display: "flex", height: "100%", transition: "transform .6s cubic-bezier(.77,0,.18,1)", transform: `translateX(-${heroSlide * 100}%)`, willChange: "transform" }}>
           {heroData.map((h, i) => (
-            <div key={i} style={{ minWidth: "100%", height: "100%", position: "relative", flexShrink: 0 }}>
-              <img src={h.img} alt={h.title} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center center", display: "block" }} loading={i === 0 ? "eager" : "lazy"} />
-              {/* Gradiente móvil — más oscuro desde abajo para leer texto */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top,#0a0a0fff 0%,#0a0a0fee 30%,#0a0a0faa 55%,#0a0a0f44 75%,transparent 100%)" }} className="hide-desktop" />
-              {/* Gradiente desktop — lateral */}
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg,#0a0a0fee 35%,#0a0a0f99 60%,transparent 100%)" }} className="hide-mobile" />
+            <div key={i} style={{ minWidth: "100%", height: "100%", flexShrink: 0 }}>
+              <img
+                className="hero-img"
+                src={h.img}
+                alt={h.title}
+                loading={i === 0 ? "eager" : "lazy"}
+                style={{ objectPosition: `${h.focusX||'center'} ${h.focusY||'center'}` }}
+              />
             </div>
           ))}
         </div>
 
-        {/* Texto mobile — centrado verticalmente en la mitad inferior */}
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end" }} className="hide-desktop">
-          <div style={{ padding: "0 24px 72px", width: "100%" }}>
-            {heroData.map((h, i) => (
-              <div key={i} style={{ display: heroSlide === i ? "block" : "none" }}>
-                <h1 style={{ color: "#fff", fontSize: "clamp(26px,8vw,40px)", fontWeight: 900, lineHeight: 1.15, marginBottom: 10, textShadow: "0 2px 12px #0008" }}>
-                  {h.title}<br /><span style={{ color: "#a78bfa" }}>{h.highlight}</span>
-                </h1>
-                <p style={{ color: "#d8b4fe", fontSize: "clamp(13px,3.5vw,15px)", marginBottom: 24, lineHeight: 1.65, maxWidth: 320, textShadow: "0 1px 6px #0006" }}>{h.sub}</p>
-                <button className="btn-primary" onClick={() => openCat("Todos")} style={{ fontSize: 15, padding: "13px 32px", borderRadius: 10 }}>Ver ofertas</button>
-              </div>
+        {/* Flecha izquierda */}
+        {heroData.length > 1 && (
+          <button className="hero-arrow" style={{ left: 12 }} onClick={() => setHero(h => (h - 1 + heroData.length) % heroData.length)}>‹</button>
+        )}
+
+        {/* Flecha derecha */}
+        {heroData.length > 1 && (
+          <button className="hero-arrow" style={{ right: 12 }} onClick={() => setHero(h => (h + 1) % heroData.length)}>›</button>
+        )}
+
+        {/* Dots */}
+        {heroData.length > 1 && (
+          <div style={{ position: "absolute", bottom: 14, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8, zIndex: 10 }}>
+            {heroData.map((_, i) => (
+              <div
+                key={i}
+                onClick={() => setHero(i)}
+                style={{ width: heroSlide === i ? 24 : 8, height: 8, borderRadius: 4, background: heroSlide === i ? "#a78bfa" : "#ffffff66", cursor: "pointer", transition: "all .35s" }}
+              />
             ))}
           </div>
-        </div>
-
-        {/* Texto desktop */}
-        <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center" }} className="hide-mobile">
-          <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 48px", width: "100%" }}>
-            {heroData.map((h, i) => (
-              <div key={i} style={{ display: heroSlide === i ? "block" : "none", maxWidth: 560 }}>
-                <h1 style={{ color: "#fff", fontSize: "clamp(32px,4.5vw,56px)", fontWeight: 900, lineHeight: 1.1, marginBottom: 12 }}>
-                  {h.title}<br /><span style={{ color: "#a78bfa" }}>{h.highlight}</span>
-                </h1>
-                <p style={{ color: "#c4b5fd", fontSize: "clamp(14px,1.5vw,17px)", marginBottom: 32, lineHeight: 1.6 }}>{h.sub}</p>
-                <button className="btn-primary" onClick={() => openCat("Todos")} style={{ fontSize: 15, padding: "13px 32px" }}>Ver ofertas</button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dots — más arriba para no tapar el botón */}
-        <div style={{ position: "absolute", bottom: 36, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8, zIndex: 10 }}>
-          {heroData.map((_, i) => (
-            <div
-              key={i}
-              onClick={() => setHero(i)}
-              style={{ width: heroSlide === i ? 24 : 8, height: 8, borderRadius: 4, background: heroSlide === i ? "#a78bfa" : "#ffffff55", cursor: "pointer", transition: "all .35s" }}
-            />
-          ))}
-        </div>
+        )}
       </div>
 
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
@@ -838,7 +1191,7 @@ export default function App() {
               ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: 200 }} onClick={() => openCat("Todos")}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
               : (
                 <div style={{ background: "linear-gradient(135deg,#1a0533,#2d1b69)", borderRadius: 16, padding: "28px 24px", position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => openCat("Todos")}>
-                  <div style={{ position: "absolute", right: -20, top: 0, bottom: 0, width: "45%", opacity: .4 }}>
+                  <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "45%", opacity: .4, overflow: "hidden" }}>
                     {PRODUCTS[0]?.img && <img src={PRODUCTS[0].img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                   </div>
                   <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, lineHeight: 1.2, marginBottom: 6 }}>Ofertas<br />exclusivas</p>
@@ -858,7 +1211,7 @@ export default function App() {
               ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: 200 }}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
               : (
                 <div style={{ background: "linear-gradient(135deg,#0f172a,#1e293b)", borderRadius: 16, padding: "28px 24px", position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => openWA("Hola! Quiero armar mi PC ideal.")}>
-                  <div style={{ position: "absolute", right: -10, top: 0, bottom: 0, width: "50%", opacity: .5 }}>
+                  <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "50%", opacity: .5, overflow: "hidden" }}>
                     {PRODUCTS[7]?.img && <img src={PRODUCTS[7].img} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
                   </div>
                   <p style={{ color: "#fff", fontSize: 22, fontWeight: 900, lineHeight: 1.2, marginBottom: 8 }}>Arma tu<br />PC ideal</p>
@@ -1061,33 +1414,7 @@ export default function App() {
   );
 
   // ── CATEGORY VIEW ─────────────────────────────────────
-  const CategoryView = () => (
-    <div style={{ minHeight: "100vh" }}>
-      <div style={{ background: "#fff", borderBottom: "1px solid #e5e7eb", padding: "14px 24px", display: "flex", alignItems: "center", gap: 12, position: "sticky", top: 60, zIndex: 50 }}>
-        <button onClick={goHome} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#374151", fontWeight: 600, fontSize: 14, fontFamily: "'Poppins', sans-serif" }}>
-          <IcoBack s={16} /> Inicio
-        </button>
-        <span style={{ color: "#e5e7eb" }}>/</span>
-        <span style={{ fontSize: 14, fontWeight: 700, color: "#5b21b6" }}>{selCat === "Todos" ? "Todos los productos" : selCat}</span>
-        <span style={{ fontSize: 13, color: "#9ca3af" }}>({filtered.length})</span>
-      </div>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "24px" }}>
-        {filtered.length === 0
-          ? (
-            <div style={{ textAlign: "center", padding: 80, color: "#9ca3af" }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-              <p style={{ fontSize: 16, fontWeight: 600 }}>No hay productos en esta categoría</p>
-            </div>
-          )
-          : (
-            <div className="prod-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
-              {filtered.map(p => <ProductCard key={p.id} p={p} onOpen={openProd} onAdd={addCart} wish={wish} onWish={toggleWish} />)}
-            </div>
-          )
-        }
-      </div>
-    </div>
-  );
+  // CategoryView → componente externo
 
   // ── CART VIEW ─────────────────────────────────────────
   const CartView = () => (
@@ -1163,7 +1490,7 @@ export default function App() {
   // ── CONFIGURADOR VIEW ─────────────────────────────────
   const ConfiguradorView = () => {
     const configProducts = PRODUCTS.filter(p => p.productType === "torre" || p.productType === "portatil");
-    const allComps = (() => { try { const d = localStorage.getItem("onepc_components"); return d ? JSON.parse(d) : {}; } catch { return {}; } })();
+    const allComps = (() => { try { if(typeof window==="undefined")return{}; const d = localStorage.getItem("onepc_components"); return d ? JSON.parse(d) : {}; } catch { return {}; } })();
     const [sel, setSel] = useState(() =>
       Object.fromEntries(configProducts.map(p => [p.id, Object.fromEntries(Object.keys(allComps[p.id] || {}).map(k => [k, 0]))]))
     );
@@ -1330,7 +1657,18 @@ export default function App() {
       <Header />
 
       {view === "home"         && <HomeView />}
-      {view === "category"     && <CategoryView />}
+      {view === "category" && <CategoryView
+        PRODUCTS={PRODUCTS}
+        selCat={selCat}
+        search={search}
+        goHome={goHome}
+        openProd={openProd}
+        addCart={addCart}
+        wish={wish}
+        toggleWish={toggleWish}
+        fmt={fmt}
+        openWA={openWA}
+      />}
       {view === "product"      && <ProductView p={selProd} onBack={() => setView("category")} onAddCart={addCart} />}
       {view === "cart"         && <CartView />}
       {view === "configurador" && <ConfiguradorView />}
