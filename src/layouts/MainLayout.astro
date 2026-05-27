@@ -1,0 +1,31 @@
+---
+import "../styles/global.css";
+
+const { title = "Premium Catalog" } = Astro.props;
+---
+
+<html lang="es">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+
+  <body class="bg-black text-white overflow-x-hidden relative">
+
+    <!-- GRADIENTE FONDO -->
+    <div class="fixed inset-0 -z-10">
+
+      <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-purple-500/20 blur-[120px]"></div>
+
+      <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-500/20 blur-[120px]"></div>
+
+    </div>
+
+    <slot />
+
+  </body>
+
+</html>
