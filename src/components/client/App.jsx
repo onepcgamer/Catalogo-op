@@ -1487,7 +1487,7 @@ function AppInner() {
     const configProducts = PRODUCTS.filter(p => p.productType === "torre" || p.productType === "portatil");
     const [allComps, setAllComps] = useState({});
     useEffect(() => {
-      import("../utils/store.js").then(({ getAllComponents }) => getAllComponents().then(setAllComps));
+      import("../../utils/store.js").then(({ getAllComponents }) => getAllComponents().then(setAllComps));
     }, []);
     const [sel, setSel] = useState(() =>
       Object.fromEntries(configProducts.map(p => [p.id, Object.fromEntries(Object.keys(allComps[p.id] || {}).map(k => [k, 0]))]))
@@ -1684,13 +1684,7 @@ function AppInner() {
 }
 export default function App() {
   const [isClient, setIsClient] = useState(false);
-
   useEffect(() => { setIsClient(true); }, []);
-
   if (!isClient) return <div style={{minHeight:"100vh",background:"#fff"}} />;
-
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-  if (!mounted) return null;
   return <AppInner />;
 }
