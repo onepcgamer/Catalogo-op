@@ -161,7 +161,7 @@ function Brands(){
   const [toast,setToast]=useState("");
   const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500);};
   const reloadBrands = async () => { const b = await getBrands(); setBrands(b); };
-  const handleSave=()=>{
+  const handleSave= async ()=>{
     if(!form.name.trim()){showToast("⚠️ Escribe el nombre de la marca");return;}
     if(editId){ await updateBrand(editId,{name:form.name}); showToast("✓ Marca actualizada"); }
     else{ await addBrand({name:form.name}); showToast("✓ Marca agregada"); }
@@ -216,11 +216,21 @@ function Brands(){
 function CompConfigurator({product,onClose}){
   const types=product.productType==="portatil"?COMP_TYPES_PORTATIL:COMP_TYPES_TORRE;
   const [comps,setComps]=useState(()=>{
-    const saved=getProductComponents(product.id);
     const init={};
-    types.forEach(t=>{ init[t.key]=saved[t.key]||(DEFAULT_OPTIONS[t.key]||[]).map(o=>({...o})); });
+    types.forEach(t=>{ init[t.key]=(DEFAULT_OPTIONS[t.key]||[]).map(o=>({...o})); });
     return init;
   });
+  useEffect(()=>{
+    getProductComponents(product.id).then(saved=>{
+      if(saved && Object.keys(saved).length>0){
+        setComps(prev=>{
+          const merged={...prev};
+          types.forEach(t=>{ if(saved[t.key]) merged[t.key]=saved[t.key]; });
+          return merged;
+        });
+      }
+    });
+  },[product.id]);
   const [toast,setToast]=useState("");
   const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2000);};
   const addOption=key=>{setComps(prev=>({...prev,[key]:[...(prev[key]||[]),{label:"Nueva opción",price:0,incluido:false}]}));};
@@ -241,7 +251,7 @@ function CompConfigurator({product,onClose}){
       return{...prev,[key]:arr};
     });
   };
-  const handleSave=()=>{saveProductComponents(product.id,comps);showToast("✓ Componentes guardados");setTimeout(onClose,800);};
+  const handleSave= async ()=>{ await saveProductComponents(product.id,comps);showToast("✓ Componentes guardados");setTimeout(onClose,800);};
   return(
     <div style={{position:"fixed",inset:0,zIndex:300,background:"#00000077",display:"flex",alignItems:"flex-start",justifyContent:"center",overflowY:"auto",padding:"20px 16px"}}>
       <div style={{background:"#fff",borderRadius:18,width:"100%",maxWidth:820,boxShadow:"0 20px 60px #0003"}}>
@@ -311,7 +321,7 @@ function Products({products,reload}){
   const [toast,setToast]           = useState("");
   const [preview,setPreview]       = useState("");
   const [extraImages,setExtraImages] = useState(["","","",""]);
-  const [cats,setCats]             = useState(()=>getCats());
+  const [cats,setCats]             = useState([]);
   const [brands,setBrands]         = useState([]);
   const [configProduct,setConfigProduct] = useState(null);
 
@@ -355,7 +365,7 @@ function Products({products,reload}){
     setExtraImages(prev=>{ const n=[...prev]; n[idx]=""; return n; });
   };
 
-  const handleSave = ()=>{
+  const handleSave = async () => {
     if(!form.name.trim()){showToast("⚠️ Escribe el nombre");return;}
     if(!form.price){showToast("⚠️ Escribe el precio");return;}
     const price=parsePrice(form.price), oldPrice=parsePrice(form.oldPrice)||price;
@@ -377,7 +387,7 @@ function Products({products,reload}){
     window.scrollTo(0,0);
   };
 
-  const handleDelete = id=>{
+  const handleDelete = async id => {
     if(window.confirm("¿Eliminar producto?")){ await deleteProduct(id); await deleteProductComponents(id); reload(); showToast("🗑️ Eliminado"); }
   };
 
