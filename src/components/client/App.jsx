@@ -13,7 +13,7 @@ const DEFAULT_CATS = [
   { id: 1, name: "Combos",      img: "https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=200&q=80", desc: "Arma tu set perfecto" },
   { id: 2, name: "Torres",      img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=200&q=80", desc: "Potencia y diseño" },
   { id: 3, name: "Portátiles",  img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=200&q=80", desc: "Rendimiento portátil" },
-  { id: 4, name: "Monitores",   img: "https://i0.wp.com/www.gamerfocus.co/wp-content/uploads/2023/01/Estos-son-los-monitores-gamer-revelados-por-ASUS-Samsung-Alienware-y-LG-en-CES-2023.jpg?resize=720%2C394&ssl=1", desc: "Imágenes increíbles" },
+  { id: 4, name: "Monitores",   img: "https://images.unsplash.com/photo-1527443224154-c4a573d5f5b7?w=200&q=80", desc: "Imágenes increíbles" },
   { id: 5, name: "Componentes", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80", desc: "Mejora tu equipo" },
   { id: 6, name: "Accesorios",  img: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=200&q=80", desc: "Completa tu setup" },
 ];
@@ -25,14 +25,14 @@ const DEFAULT_HERO = [
 ];
 
 const BRANDS = [
-  { name: "AMD",      logo: "https://cdn.worldvectorlogo.com/logos/amd-logo-1.svg" },
-  { name: "Intel",    logo: "https://1000marcas.net/wp-content/uploads/2020/02/logo-Intel.png" },
-  { name: "NVIDIA",   logo: "https://e7.pngegg.com/pngimages/534/277/png-clipart-nvidia-geforce-graphics-processing-unit-logo-nvidia-electronics-text-thumbnail.png" },
-  { name: "ASUS",     logo: "https://cdn.freebiesupply.com/logos/large/2x/asus-6630-logo-png-transparent.png" },
-  { name: "MSI",      logo: "https://1000marcas.net/wp-content/uploads/2020/03/logo-MSI.png" },
-  { name: "GIGABYTE", logo: "https://brandslogos.com/wp-content/uploads/images/large/gigabyte-logo-black-and-white-1.png" },
-  { name: "HP",       logo: "https://cdn.worldvectorlogo.com/logos/hp-2.svg" },
-  { name: "SAMSUNG",  logo: "https://logoeps.com/wp-content/uploads/2013/05/samsung-group-vector-logo.png" },
+  { name: "AMD",      logo: "https://cdn.worldvectorlogo.com/logos/amd-logo-1.svg",         h: 28 },
+  { name: "Intel",    logo: "https://1000marcas.net/wp-content/uploads/2020/02/logo-Intel.png", h: 38 },
+  { name: "NVIDIA",   logo: "https://e7.pngegg.com/pngimages/534/277/png-clipart-nvidia-geforce-graphics-processing-unit-logo-nvidia-electronics-text-thumbnail.png", h: 24 },
+  { name: "ASUS",     logo: "https://cdn.freebiesupply.com/logos/large/2x/asus-6630-logo-png-transparent.png", h: 32 },
+  { name: "MSI",      logo: "https://1000marcas.net/wp-content/uploads/2020/03/logo-MSI.png", h: 36 },
+  { name: "GIGABYTE", logo: "https://brandslogos.com/wp-content/uploads/images/large/gigabyte-logo-black-and-white-1.png", h: 22 },
+  { name: "HP",       logo: "https://cdn.worldvectorlogo.com/logos/hp-2.svg",               h: 44 },
+  { name: "SAMSUNG",  logo: "https://logoeps.com/wp-content/uploads/2013/05/samsung-group-vector-logo.png", h: 26 },
 ];
 const REVIEWS = [
   { name: "Juan P.",   city: "Bogotá, Colombia",   stars: 5, text: "Excelente atención y el envío fue súper rápido. Mi PC llegó en perfecto estado y funciona increíble." },
@@ -1435,9 +1435,9 @@ function AppInner() {
                   src={b.logo}
                   alt={b.name}
                   loading="lazy"
-                  style={{ maxHeight: 36, maxWidth: "100%", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.7, transition: "all .22s" }}
+                  style={{ height: b.h, maxWidth: "80%", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.65, transition: "all .22s" }}
                   onMouseEnter={e => { e.target.style.filter = "grayscale(0%)"; e.target.style.opacity = "1"; }}
-                  onMouseLeave={e => { e.target.style.filter = "grayscale(100%)"; e.target.style.opacity = "0.7"; }}
+                  onMouseLeave={e => { e.target.style.filter = "grayscale(100%)"; e.target.style.opacity = "0.65"; }}
                   onError={e => { e.target.style.display="none"; e.target.nextSibling.style.display="block"; }}
                 />
                 <span style={{ display: "none", fontSize: 13, fontWeight: 800, color: "#374151" }}>{b.name}</span>
