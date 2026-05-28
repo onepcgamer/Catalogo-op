@@ -749,7 +749,8 @@ function PriceSlider({ min, max, valueMin, valueMax, onChange, fmt }) {
   );
 }
 
-function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wish, toggleWish, fmt, openWA }) {
+function CategoryView({ PRODUCTS, selCat, search, onSearch, goHome, openProd, addCart, wish, toggleWish, fmt, openWA }) {
+  const onChange = onSearch || (() => {});
   const [filterBrands, setFilterBrands] = useState([]);
   const [rangeMin,     setRangeMin]     = useState(0);
   const [rangeMax,     setRangeMax]     = useState(0);
@@ -884,19 +885,39 @@ function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wis
       )}
 
       {/* Breadcrumb */}
-      <div style={{background:"#fff",borderBottom:"1px solid #e5e7eb",padding:"12px clamp(16px,3vw,28px)",display:"flex",alignItems:"center",gap:10,position:"sticky",top:"clamp(52px,7vw,64px)",zIndex:50}}>
-        <button onClick={goHome} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:6,color:"#374151",fontWeight:600,fontSize:14,fontFamily:"'Poppins',sans-serif"}}>
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Inicio
-        </button>
-        <span style={{color:"#e5e7eb"}}>/</span>
-        <span style={{fontSize:14,fontWeight:700,color:"#5b21b6"}}>{selCat==="Todos"?"Todos los productos":selCat}</span>
-        <span style={{fontSize:13,color:"#9ca3af"}}>({result.length})</span>
-        <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center"}}>
-          {activeFilters > 0 && <span style={{background:"#5b21b6",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10}}>{activeFilters} filtros</span>}
-          <button onClick={()=>setFilterOpen(true)} className="hide-desktop" style={{background:"#f3f4f6",border:"none",borderRadius:8,padding:"7px 14px",fontSize:13,fontWeight:600,cursor:"pointer",fontFamily:"'Poppins',sans-serif"}}>
-            ⚙️ Filtros{activeFilters > 0 ? " ("+activeFilters+")" : ""}
+      <div style={{background:"#fff",borderBottom:"1px solid #e5e7eb",position:"sticky",top:0,zIndex:50}}>
+        {/* Fila superior */}
+        <div style={{padding:"10px clamp(14px,3vw,24px)",display:"flex",alignItems:"center",gap:10}}>
+          <button onClick={goHome} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:6,color:"#374151",fontWeight:600,fontSize:14,fontFamily:"'Poppins',sans-serif",flexShrink:0}}>
+            <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Inicio
           </button>
+          <span style={{color:"#e5e7eb"}}>/</span>
+          <span style={{fontSize:14,fontWeight:700,color:"#5b21b6",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{selCat==="Todos"?"Todos los productos":selCat}</span>
+          <span style={{fontSize:13,color:"#9ca3af",flexShrink:0}}>({result.length})</span>
+          <div style={{marginLeft:"auto",display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+            {activeFilters > 0 && <span style={{background:"#5b21b6",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 8px",borderRadius:10}}>{activeFilters} filtros</span>}
+            <button onClick={()=>setFilterOpen(true)} className="hide-desktop" style={{background:"#f3f4f6",border:"none",borderRadius:8,padding:"7px 12px",fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"'Poppins',sans-serif"}}>
+              ⚙️{activeFilters > 0 ? " ("+activeFilters+")" : " Filtros"}
+            </button>
+          </div>
+        </div>
+        {/* Barra búsqueda móvil — siempre visible en CategoryView */}
+        <div className="hide-desktop" style={{padding:"0 14px 10px"}}>
+          <div style={{position:"relative"}}>
+            <input
+              value={search}
+              onChange={e => onChange(e.target.value)}
+              placeholder={"Buscar en " + (selCat==="Todos"?"todos los productos":selCat) + "..."}
+              style={{width:"100%",border:"1.5px solid #e5e7eb",borderRadius:10,padding:"9px 70px 9px 14px",fontSize:13,outline:"none",fontFamily:"'Poppins',sans-serif",color:"#111"}}
+            />
+            {search && (
+              <button onClick={()=>onChange("")} style={{position:"absolute",right:66,top:"50%",transform:"translateY(-50%)",background:"none",border:"none",color:"#9ca3af",fontSize:18,cursor:"pointer",lineHeight:1}}>×</button>
+            )}
+            <div style={{position:"absolute",right:0,top:0,bottom:0,display:"flex",alignItems:"center",paddingRight:8}}>
+              <span style={{background:"#f3f4f6",borderRadius:8,padding:"5px 10px",fontSize:12,fontWeight:600,color:"#374151"}}>{result.length}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -959,6 +980,7 @@ function AppInner() {
   const [wish,      setWish]     = useState([]);
   const [search,    setSearch]   = useState("");
   const [menuOpen,  setMenu]     = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [catMenu,   setCatMenu]  = useState(false);
   const [heroSlide, setHero]     = useState(0);
   const [toast,     setToast]    = useState("");
@@ -1123,7 +1145,7 @@ function AppInner() {
 
         {/* Íconos derecha */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto", flexShrink: 0 }}>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setMenu(true)}><IcoSearch s={20} /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setSearchOpen(v => !v)}><IcoSearch s={20} /></div>
           <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-mobile"><IcoUser /></div>
           <div style={{ color: "#d1d5db", cursor: "pointer" }} onClick={() => {/* Wishlist futura */}}><IcoHeart s={18} /></div>
           <div style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center" }} onClick={() => setView("cart")}>
@@ -1733,12 +1755,32 @@ function AppInner() {
 
       {menuOpen && <MobileMenu />}
       <Header />
+      {/* Barra búsqueda móvil desplegable */}
+      {searchOpen && (
+        <div className="hide-desktop" style={{ background: "#0f0f0f", padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)", position: "sticky", top: "clamp(52px,7vw,64px)", zIndex: 99 }}>
+          <div style={{ position: "relative" }}>
+            <input
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => { if(e.key === "Enter" && search.trim()) { setSearchOpen(false); openCat("Todos"); } }}
+              placeholder="Buscar productos..."
+              style={{ width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 10, padding: "11px 80px 11px 16px", color: "#fff", fontSize: 14, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+            />
+            <button
+              onClick={() => { if(search.trim()) { setSearchOpen(false); openCat("Todos"); } }}
+              style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", background: "#5b21b6", border: "none", borderRadius: 8, padding: "7px 14px", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif" }}
+            >Buscar</button>
+          </div>
+        </div>
+      )}
 
       {view === "home"         && <HomeView />}
       {view === "category" && <CategoryView
         PRODUCTS={PRODUCTS}
         selCat={selCat}
         search={search}
+        onSearch={setSearch}
         goHome={goHome}
         openProd={openProd}
         addCart={addCart}
