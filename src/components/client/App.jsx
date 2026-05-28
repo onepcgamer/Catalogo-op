@@ -25,14 +25,14 @@ const DEFAULT_HERO = [
 ];
 
 const BRANDS = [
-  { name: "AMD",      logo: "https://cdn.worldvectorlogo.com/logos/amd-logo-1.svg",         h: 28 },
-  { name: "Intel",    logo: "https://1000marcas.net/wp-content/uploads/2020/02/logo-Intel.png", h: 38 },
-  { name: "NVIDIA",   logo: "https://e7.pngegg.com/pngimages/534/277/png-clipart-nvidia-geforce-graphics-processing-unit-logo-nvidia-electronics-text-thumbnail.png", h: 24 },
-  { name: "ASUS",     logo: "https://cdn.freebiesupply.com/logos/large/2x/asus-6630-logo-png-transparent.png", h: 32 },
-  { name: "MSI",      logo: "https://1000marcas.net/wp-content/uploads/2020/03/logo-MSI.png", h: 36 },
-  { name: "GIGABYTE", logo: "https://brandslogos.com/wp-content/uploads/images/large/gigabyte-logo-black-and-white-1.png", h: 22 },
-  { name: "HP",       logo: "https://cdn.worldvectorlogo.com/logos/hp-2.svg",               h: 44 },
-  { name: "SAMSUNG",  logo: "https://logoeps.com/wp-content/uploads/2013/05/samsung-group-vector-logo.png", h: 26 },
+  { name: "AMD",      logo: "https://cdn.worldvectorlogo.com/logos/amd-logo-1.svg",         h: 30 },
+  { name: "Intel",    logo: "https://1000marcas.net/wp-content/uploads/2020/02/logo-Intel.png", h: 36 },
+  { name: "NVIDIA",   logo: "https://e7.pngegg.com/pngimages/534/277/png-clipart-nvidia-geforce-graphics-processing-unit-logo-nvidia-electronics-text-thumbnail.png", h: 28 },
+  { name: "ASUS",     logo: "https://cdn.freebiesupply.com/logos/large/2x/asus-6630-logo-png-transparent.png", h: 38 },
+  { name: "MSI",      logo: "https://1000marcas.net/wp-content/uploads/2020/03/logo-MSI.png", h: 34 },
+  { name: "GIGABYTE", logo: "https://brandslogos.com/wp-content/uploads/images/large/gigabyte-logo-black-and-white-1.png", h: 24 },
+  { name: "HP",       logo: "https://cdn.worldvectorlogo.com/logos/hp-2.svg",               h: 34 },
+  { name: "SAMSUNG",  logo: "https://logoeps.com/wp-content/uploads/2013/05/samsung-group-vector-logo.png", h: 38 },
 ];
 const REVIEWS = [
   { name: "Juan P.",   city: "Bogotá, Colombia",   stars: 5, text: "Excelente atención y el envío fue súper rápido. Mi PC llegó en perfecto estado y funciona increíble." },
