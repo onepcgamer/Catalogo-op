@@ -5,17 +5,19 @@ import App from '../components/client/App.jsx';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ONE PC</title>
+    <meta name="theme-color" content="#0f0f0f" />
+    <title>ONE PC Store</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      html { overflow-x: hidden; }
-      body { margin: 0; padding: 0; overflow-x: hidden; }
+      html, body { overflow-x: hidden; max-width: 100%; }
+      body { margin: 0; padding: 0; background: #fff; }
+      #onepc-loading { min-height: 100vh; background: #fff; }
     </style>
   </head>
-  <body style="margin:0;padding:0;">
+  <body>
     <App client:only="react" />
   </body>
 </html>
