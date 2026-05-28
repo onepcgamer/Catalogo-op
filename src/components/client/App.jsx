@@ -129,8 +129,8 @@ const css = `
     .hero-arrow  { width: 32px; height: 32px; font-size: 18px; }
 
     /* grids */
-    .cat-grid    { grid-template-columns: repeat(3, 1fr); gap: 8px; }
-    .prod-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .cat-grid    { grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+    .prod-grid   { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
     .promo-grid  { grid-template-columns: 1fr; gap: 12px; }
     .benefits-row { grid-template-columns: 1fr 1fr; gap: 14px; }
     .reviews-row  { flex-direction: column; }
@@ -154,9 +154,9 @@ const css = `
      SMALL MOBILE  ≤ 480px
   ══════════════════════════════════════════════ */
   @media (max-width: 480px) {
-    .cat-grid  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .cat-grid  { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
     .hero-wrap { height: 38vh; }
-    .prod-grid { gap: 8px; }
+    .prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
   }
 
   @media (min-width: 769px) { .hide-desktop { display: none !important; } }
@@ -939,7 +939,7 @@ function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wis
               <button onClick={clearFilters} style={{background:"#5b21b6",color:"#fff",border:"none",borderRadius:8,padding:"10px 24px",fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Poppins',sans-serif"}}>Limpiar filtros</button>
             </div>
           ) : (
-            <div className="prod-grid" style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16}}>
+            <div className="prod-grid">
               {result.map(p => (
                 <ProductCard key={p.id} p={p} onOpen={openProd} onAdd={addCart} wish={wish} onWish={toggleWish}/>
               ))}
@@ -1249,7 +1249,7 @@ function AppInner() {
             </div>
             <span className="section-link" onClick={() => openCat("Todos")}>Ver todas <IcoArrow s={14} /></span>
           </div>
-          <div className="cat-grid" style={{ display: "grid", gridTemplateColumns: "repeat(6,1fr)", gap: 14 }}>
+          <div className="cat-grid">
             {CATEGORIES.map(c => (
               <div key={c.name} className="cat-card" onClick={() => openCat(c.name)}>
                 <img src={c.img} alt={c.name} style={{ width: "100%", height: 100, objectFit: "cover" }} loading="lazy" />
@@ -1322,7 +1322,7 @@ function AppInner() {
               </div>
             )
             : (
-              <div className="prod-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+              <div className="prod-grid">
                 {PRODUCTS.slice(0, 8).map(p => <ProductCard key={p.id} p={p} onOpen={openProd} onAdd={addCart} wish={wish} onWish={toggleWish} />)}
               </div>
             )
