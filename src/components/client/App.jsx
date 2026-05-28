@@ -299,7 +299,7 @@ function ProductView({ p, onBack, onAddCart }) {
   // ── CSS específico de galería ──────────────────────────────────────
   const galleryCss = `
     .gallery-main {
-      width: 100%; height: 400px; object-fit: cover; display: block;
+      width: 100%; height: clamp(220px, 50vw, 400px); object-fit: cover; display: block;
       transition: transform .1s ease;
       cursor: zoom-in;
     }
@@ -312,7 +312,7 @@ function ProductView({ p, onBack, onAddCart }) {
     .thumb-btn {
       border: 2px solid #e5e7eb; border-radius: 8px; overflow: hidden;
       cursor: pointer; transition: all .18s; background: #fff; padding: 0;
-      width: 72px; height: 72px; flex-shrink: 0;
+      width: clamp(56px,14vw,72px); height: clamp(56px,14vw,72px); flex-shrink: 0;
     }
     .thumb-btn:hover { border-color: #a78bfa; }
     .thumb-btn.active { border-color: #5b21b6; box-shadow: 0 0 0 2px #5b21b633; }
@@ -402,7 +402,7 @@ function ProductView({ p, onBack, onAddCart }) {
       )}
 
       {/* Breadcrumb */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "12px clamp(16px,3vw,28px)", display: "flex", alignItems: "center", gap: 10, position: "sticky", top: "clamp(52px,7vw,64px)", zIndex: 50 }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "10px clamp(14px,3vw,24px)", display: "flex", alignItems: "center", gap: 8, position: "sticky", top: 0, zIndex: 50 }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#6b7280", fontSize: 13, fontWeight: 500, fontFamily: "'Poppins',sans-serif" }}>
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Volver
@@ -412,7 +412,7 @@ function ProductView({ p, onBack, onAddCart }) {
       </div>
 
       <div
-        style={{ maxWidth: 1060, margin: "0 auto", padding: "36px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 52 }}
+        style={{ maxWidth: 1060, margin: "0 auto", padding: "clamp(20px,4vw,40px) clamp(16px,3vw,28px)" }}
         className="product-grid-2col"
       >
         {/* ── COLUMNA GALERÍA ── */}
@@ -1124,7 +1124,8 @@ function AppInner() {
 
         {/* Íconos derecha */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto", flexShrink: 0 }}>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }}><IcoUser /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setMenu(true)}><IcoSearch s={20} /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-mobile"><IcoUser /></div>
           <div style={{ color: "#d1d5db", cursor: "pointer" }} onClick={() => {/* Wishlist futura */}}><IcoHeart s={18} /></div>
           <div style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center" }} onClick={() => setView("cart")}>
             <IcoCart s={22} c="#d1d5db" />
@@ -1155,17 +1156,22 @@ function AppInner() {
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => { if(e.key === "Enter") { setMenu(false); setView("category"); } }}
               placeholder="Buscar productos..."
-              style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 14px 10px 36px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+              style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 40px 10px 36px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
             />
             <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#666" }}><IcoSearch s={15} /></div>
+            <button
+              onClick={() => { setMenu(false); setView("category"); }}
+              style={{ position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)", background: "#5b21b6", border: "none", borderRadius: 6, padding: "4px 8px", color: "#fff", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif" }}
+            >Buscar</button>
           </div>
         </div>
         {/* Nav links */}
         <nav style={{ flex: 1, padding: "8px 12px" }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: 1.2, padding: "10px 8px 6px" }}>Categorías</p>
           {["Todos", ...CATEGORIES.map(c => c.name)].map(c => (
-            <button key={c} onClick={() => { c === "Todos" ? goHome() : openCat(c); }}
+            <button key={c} onClick={() => { openCat(c === "Todos" ? "Todos" : c); }}
               style={{ width: "100%", background: "none", border: "none", color: "#d1d5db", fontSize: 14, padding: "11px 10px", cursor: "pointer", borderRadius: 10, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'Poppins', sans-serif", transition: "background .15s" }}
               onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
               onMouseLeave={e => e.currentTarget.style.background = "none"}
@@ -1195,6 +1201,24 @@ function AppInner() {
   // ── HOME VIEW ─────────────────────────────────────────
   const HomeView = () => (
     <div>
+      {/* BARRA BÚSQUEDA MÓVIL — sticky bajo el header */}
+      <div className="hide-desktop" style={{ background: "#0f0f0f", padding: "8px 16px 10px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ position: "relative" }}>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => { if(e.key === "Enter") setView("category"); }}
+            placeholder="Buscar productos..."
+            style={{ width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 70px 10px 36px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+          />
+          <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#666" }}><IcoSearch s={15} /></div>
+          <button
+            onClick={() => setView("category")}
+            style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", background: "#5b21b6", border: "none", borderRadius: 8, padding: "6px 12px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif" }}
+          >Buscar</button>
+        </div>
+      </div>
+
       {/* HERO SLIDER — imagen limpia, sin texto superpuesto */}
       <div className="hero-wrap" style={{ position: "relative", overflow: "hidden", background: "#000", width: "100%" }}>
 
