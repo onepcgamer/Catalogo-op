@@ -24,7 +24,16 @@ const DEFAULT_HERO = [
   { title: "Componentes",          highlight: "de última generación",  sub: "Arma o actualiza tu PC con las mejores piezas del mercado.",            img: "https://images.unsplash.com/photo-1555617766-c94804975da5?w=1200&q=80" },
 ];
 
-const BRANDS  = ["AMD", "Intel", "NVIDIA", "ASUS", "MSI", "GIGABYTE", "HP", "SAMSUNG"];
+const BRANDS = [
+  { name: "AMD",      logo: "https://cdn.worldvectorlogo.com/logos/amd-logo-1.svg" },
+  { name: "Intel",    logo: "https://1000marcas.net/wp-content/uploads/2020/02/logo-Intel.png" },
+  { name: "NVIDIA",   logo: "https://e7.pngegg.com/pngimages/534/277/png-clipart-nvidia-geforce-graphics-processing-unit-logo-nvidia-electronics-text-thumbnail.png" },
+  { name: "ASUS",     logo: "https://cdn.freebiesupply.com/logos/large/2x/asus-6630-logo-png-transparent.png" },
+  { name: "MSI",      logo: "https://1000marcas.net/wp-content/uploads/2020/03/logo-MSI.png" },
+  { name: "GIGABYTE", logo: "https://brandslogos.com/wp-content/uploads/images/large/gigabyte-logo-black-and-white-1.png" },
+  { name: "HP",       logo: "https://cdn.worldvectorlogo.com/logos/hp-2.svg" },
+  { name: "SAMSUNG",  logo: "https://logoeps.com/wp-content/uploads/2013/05/samsung-group-vector-logo.png" },
+];
 const REVIEWS = [
   { name: "Juan P.",   city: "Bogotá, Colombia",   stars: 5, text: "Excelente atención y el envío fue súper rápido. Mi PC llegó en perfecto estado y funciona increíble." },
   { name: "María G.",  city: "Medellín, Colombia",  stars: 5, text: "Armar mi PC con sus componentes fue muy fácil y la asesoría personalizada me ayudó mucho." },
@@ -1414,15 +1423,24 @@ function AppInner() {
         {/* MARCAS */}
         <div style={{ padding: "clamp(24px,4vw,52px) 0" }}>
           <h2 className="section-title" style={{ marginBottom: 24 }}>Las mejores marcas en un solo lugar</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
             {BRANDS.map(b => (
               <div
-                key={b}
-                style={{ padding: "12px 16px", border: "1.5px solid #f0f0f0", borderRadius: 10, fontSize: 14, fontWeight: 800, color: "#374151", cursor: "pointer", transition: "all .2s", textAlign: "center" }}
-                onMouseEnter={e => { e.currentTarget.style.borderColor = "#5b21b6"; e.currentTarget.style.color = "#5b21b6"; }}
-                onMouseLeave={e => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.color = "#374151"; }}
+                key={b.name}
+                style={{ padding: "16px 20px", border: "1.5px solid #f0f0f0", borderRadius: 14, cursor: "pointer", transition: "all .22s", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", background: "#fff", minHeight: 72 }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "#5b21b6"; e.currentTarget.style.boxShadow = "0 4px 16px #5b21b611"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "none"; }}
               >
-                {b}
+                <img
+                  src={b.logo}
+                  alt={b.name}
+                  loading="lazy"
+                  style={{ maxHeight: 36, maxWidth: "100%", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.7, transition: "all .22s" }}
+                  onMouseEnter={e => { e.target.style.filter = "grayscale(0%)"; e.target.style.opacity = "1"; }}
+                  onMouseLeave={e => { e.target.style.filter = "grayscale(100%)"; e.target.style.opacity = "0.7"; }}
+                  onError={e => { e.target.style.display="none"; e.target.nextSibling.style.display="block"; }}
+                />
+                <span style={{ display: "none", fontSize: 13, fontWeight: 800, color: "#374151" }}>{b.name}</span>
               </div>
             ))}
           </div>
