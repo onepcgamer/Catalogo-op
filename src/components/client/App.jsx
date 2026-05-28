@@ -38,56 +38,127 @@ const openWA = msg => window.open(`https://wa.me/${WA}?text=${encodeURIComponent
 // ── CSS global ────────────────────────────────────────
 const css = `
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { overflow-x: hidden; }
-  body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; overflow-x: hidden; max-width: 100%; }
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+  html { overflow-x: hidden; scroll-behavior: smooth; }
+  body { font-family: 'Poppins', sans-serif; background: #fff; color: #111; overflow-x: hidden; max-width: 100vw; }
+  ::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+  /* ── BUTTONS ── */
   .btn-primary  { background: #5b21b6; color: #fff; border: none; border-radius: 8px; padding: 11px 22px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; font-family: 'Poppins', sans-serif; }
   .btn-primary:hover { background: #4c1d95; transform: translateY(-1px); }
   .btn-outline  { background: transparent; color: #fff; border: 2px solid #fff; border-radius: 8px; padding: 10px 22px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Poppins', sans-serif; }
   .btn-cart     { width: 100%; background: #fff; color: #111; border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 10px 0; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all .2s; margin-top: 10px; font-family: 'Poppins', sans-serif; }
   .btn-cart:hover { border-color: #5b21b6; color: #5b21b6; }
-  .section-title { font-size: clamp(18px, 2.5vw, 24px); font-weight: 800; margin-bottom: 4px; }
+
+  /* ── TYPOGRAPHY ── */
+  .section-title { font-size: clamp(18px, 2.5vw, 26px); font-weight: 800; margin-bottom: 4px; }
   .section-link  { font-size: 13px; color: #5b21b6; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; }
   .section-link:hover { text-decoration: underline; }
+
+  /* ── CARDS ── */
   .product-card  { border: 1.5px solid #f0f0f0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all .22s; background: #fff; }
   .product-card:hover { border-color: #5b21b6; box-shadow: 0 8px 32px #5b21b611; transform: translateY(-4px); }
   .product-card:hover .pcard-img { transform: scale(1.04); }
-  .pcard-img    { width: 100%; height: 180px; object-fit: cover; transition: transform .35s; display: block; background: #f9fafb; }
-  .cat-card     { border: 1.5px solid #f0f0f0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all .22s; text-align: center; background: #fff; }
+  .pcard-img     { width: 100%; height: clamp(130px,20vw,200px); object-fit: cover; transition: transform .35s; display: block; background: #f9fafb; }
+  .cat-card      { border: 1.5px solid #f0f0f0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: all .22s; text-align: center; background: #fff; }
   .cat-card:hover { border-color: #5b21b6; box-shadow: 0 8px 24px #5b21b611; transform: translateY(-3px); }
-  .nav-link     { font-size: 14px; font-weight: 500; color: #d1d5db; cursor: pointer; transition: color .18s; padding: 4px 0; white-space: nowrap; }
+
+  /* ── NAV ── */
+  .nav-link      { font-size: 14px; font-weight: 500; color: #d1d5db; cursor: pointer; transition: color .18s; padding: 4px 0; white-space: nowrap; }
   .nav-link:hover { color: #fff; }
   .nav-link.active { color: #a78bfa; font-weight: 700; }
+
+  /* ── MISC ── */
   .badge-discount { background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 4px; position: absolute; top: 10px; left: 10px; }
-  .review-card  { background: #fff; border: 1.5px solid #f0f0f0; border-radius: 14px; padding: 20px; flex: 1; min-width: 0; width: 100%; }
+  .review-card   { background: #fff; border: 1.5px solid #f0f0f0; border-radius: 14px; padding: 20px; flex: 1; min-width: 0; width: 100%; }
   .footer-col h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: #fff; }
-  .footer-link  { font-size: 13px; color: #9ca3af; cursor: pointer; margin-bottom: 8px; display: block; transition: color .18s; }
+  .footer-link   { font-size: 13px; color: #9ca3af; cursor: pointer; margin-bottom: 8px; display: block; transition: color .18s; }
   .footer-link:hover { color: #fff; }
-  .input-field  { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 11px 14px; font-size: 13px; outline: none; transition: border-color .18s; font-family: 'Poppins', sans-serif; }
+  .input-field   { border: 1.5px solid #e5e7eb; border-radius: 8px; padding: 11px 14px; font-size: 13px; outline: none; transition: border-color .18s; font-family: 'Poppins', sans-serif; }
   .input-field:focus { border-color: #5b21b6; }
-  /* WhatsApp FAB */
-  .wa-fab { position: fixed; bottom: 24px; right: 20px; z-index: 999; cursor: pointer; transition: transform .25s, box-shadow .25s; width: 52px; height: 52px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px #25d36655; max-width: 52px; }
+
+  /* ── WHATSAPP FAB ── */
+  .wa-fab { position: fixed; bottom: 20px; right: 16px; z-index: 998; cursor: pointer; transition: transform .25s, box-shadow .25s; width: 50px; height: 50px; border-radius: 50%; background: #25d366; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px #25d36655; }
   .wa-fab:hover { transform: scale(1.12); box-shadow: 0 8px 32px #25d36688; }
-  @media (max-width: 768px) {
-    .hide-mobile  { display: none !important; }
-    .cat-grid     { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-    .prod-grid    { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-    .promo-grid   { grid-template-columns: 1fr !important; }
-    .footer-grid  { grid-template-columns: 1fr !important; gap: 20px !important; }
-    .brands-row   { gap: 12px !important; justify-content: center !important; flex-wrap: wrap !important; }
-    .reviews-row  { flex-direction: column !important; overflow: hidden !important; }
-    .benefits-row { grid-template-columns: 1fr 1fr !important; gap: 16px !important; }
-    .cart-layout  { grid-template-columns: 1fr !important; }
-    .product-grid-2col { grid-template-columns: 1fr !important; gap: 20px !important; }
-    .addi-banner  { flex-direction: column !important; gap: 20px !important; }
-    .footer-bottom { flex-direction: column !important; gap: 12px !important; align-items: center !important; }
-    .newsletter-inner { flex-direction: column !important; align-items: flex-start !important; }
-    .pcard-img    { height: 150px; }
-    .wa-fab       { bottom: 20px; right: 16px; width: 52px; height: 52px; }
-    .hero-wrap    { min-height: 600px !important; height: 88vh !important; }
+
+  /* ── HERO ── */
+  .hero-wrap { position: relative; overflow: hidden; background: #000; width: 100%; height: 56vw; min-height: 300px; max-height: 700px; }
+  .hero-img  { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .4s; }
+  .hero-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.4); border: none; color: #fff; font-size: 22px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .18s; backdrop-filter: blur(6px); }
+  .hero-arrow:hover { background: rgba(0,0,0,.7); }
+
+  /* ── GRIDS ── */
+  .cat-grid    { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; }
+  .prod-grid   { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .promo-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 32px 0; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1.5fr; gap: 32px; margin-bottom: 40px; }
+  .cart-layout { display: grid; grid-template-columns: 1fr 340px; gap: 24px; }
+  .benefits-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .reviews-row { display: flex; gap: 16px; }
+  .brands-row  { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .product-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 52px; }
+  .addi-banner { display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+  .newsletter-inner { display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; }
+
+  /* ── VISIBILITY ── */
+  .hide-mobile  { display: flex; }
+  .hide-desktop { display: none; }
+
+  /* ══════════════════════════════════════════════
+     TABLET  ≤ 1024px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 1024px) {
+    .cat-grid    { grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .prod-grid   { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .footer-grid { grid-template-columns: 1fr 1fr 1fr; gap: 24px; }
+    .hero-wrap   { height: 60vw; max-height: 580px; }
   }
+
+  /* ══════════════════════════════════════════════
+     MOBILE  ≤ 768px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 768px) {
+    /* visibility */
+    .hide-mobile  { display: none !important; }
+    .hide-desktop { display: flex !important; }
+
+    /* hero */
+    .hero-wrap   { height: 40vh; min-height: 200px; max-height: 320px; }
+    .hero-arrow  { width: 32px; height: 32px; font-size: 18px; }
+
+    /* grids */
+    .cat-grid    { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .prod-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .promo-grid  { grid-template-columns: 1fr; gap: 12px; }
+    .benefits-row { grid-template-columns: 1fr 1fr; gap: 14px; }
+    .reviews-row  { flex-direction: column; }
+    .brands-row   { gap: 10px; justify-content: center; }
+    .footer-grid  { grid-template-columns: 1fr 1fr; gap: 20px; }
+    .cart-layout  { grid-template-columns: 1fr; }
+    .addi-banner  { flex-direction: column; gap: 16px; text-align: center; align-items: flex-start; }
+    .newsletter-inner { flex-direction: column; align-items: flex-start; }
+    .footer-bottom    { flex-direction: column; gap: 12px; align-items: center; }
+    .product-grid-2col { grid-template-columns: 1fr; gap: 24px; }
+
+    /* cards */
+    .pcard-img   { height: clamp(110px,28vw,160px); }
+    .cat-card .cat-desc { display: none; }
+
+    /* wa fab */
+    .wa-fab { bottom: 16px; right: 12px; width: 46px; height: 46px; }
+  }
+
+  /* ══════════════════════════════════════════════
+     SMALL MOBILE  ≤ 480px
+  ══════════════════════════════════════════════ */
+  @media (max-width: 480px) {
+    .cat-grid  { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .hero-wrap { height: 38vh; }
+    .prod-grid { gap: 8px; }
+  }
+
   @media (min-width: 769px) { .hide-desktop { display: none !important; } }
 `;
 
@@ -331,7 +402,7 @@ function ProductView({ p, onBack, onAddCart }) {
       )}
 
       {/* Breadcrumb */}
-      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "12px 24px", display: "flex", alignItems: "center", gap: 10, position: "sticky", top: 60, zIndex: 50 }}>
+      <div style={{ background: "#fff", borderBottom: "1px solid #f0f0f0", padding: "12px clamp(16px,3vw,28px)", display: "flex", alignItems: "center", gap: 10, position: "sticky", top: "clamp(52px,7vw,64px)", zIndex: 50 }}>
         <button onClick={onBack} style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, color: "#6b7280", fontSize: 13, fontWeight: 500, fontFamily: "'Poppins',sans-serif" }}>
           <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Volver
@@ -814,7 +885,7 @@ function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wis
       )}
 
       {/* Breadcrumb */}
-      <div style={{background:"#fff",borderBottom:"1px solid #e5e7eb",padding:"14px 24px",display:"flex",alignItems:"center",gap:12,position:"sticky",top:60,zIndex:50}}>
+      <div style={{background:"#fff",borderBottom:"1px solid #e5e7eb",padding:"12px clamp(16px,3vw,28px)",display:"flex",alignItems:"center",gap:10,position:"sticky",top:"clamp(52px,7vw,64px)",zIndex:50}}>
         <button onClick={goHome} style={{background:"none",border:"none",cursor:"pointer",display:"flex",alignItems:"center",gap:6,color:"#374151",fontWeight:600,fontSize:14,fontFamily:"'Poppins',sans-serif"}}>
           <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Inicio
@@ -831,7 +902,7 @@ function CategoryView({ PRODUCTS, selCat, search, goHome, openProd, addCart, wis
       </div>
 
       {/* Layout */}
-      <div style={{maxWidth:1280,margin:"0 auto",padding:"24px",display:"flex",gap:28,alignItems:"flex-start"}}>
+      <div style={{maxWidth:1280,margin:"0 auto",padding:"clamp(16px,3vw,28px)",display:"flex",gap:24,alignItems:"flex-start"}}>
 
         {/* Sidebar desktop */}
         <div className="cat-sidebar">
@@ -992,12 +1063,12 @@ function AppInner() {
 
   // ── HEADER ────────────────────────────────────────────
   const Header = () => (
-    <header style={{ background: "#0f0f0f", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 2px 20px #0009" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", gap: 20, height: 60 }}>
-        <button onClick={() => setMenu(!menuOpen)} className="hide-desktop" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer" }}>
+    <header style={{ background: "rgba(15,15,15,0.96)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 4px 24px #000a", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)", display: "flex", alignItems: "center", gap: "clamp(12px,2vw,24px)", height: "clamp(52px,7vw,64px)" }}>
+        <button onClick={() => setMenu(!menuOpen)} className="hide-desktop" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 6, borderRadius: 8, display: "flex", alignItems: "center" }}>
           <IcoMenu />
         </button>
-        <div onClick={goHome}><Logo /></div>
+        <div onClick={goHome} style={{ cursor: "pointer", flexShrink: 0 }}><Logo /></div>
 
         <nav className="hide-mobile" style={{ display: "flex", gap: 24 }}>
           {[
@@ -1070,32 +1141,54 @@ function AppInner() {
 
   // ── MOBILE MENU ───────────────────────────────────────
   const MobileMenu = () => (
-    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex" }}>
-      <div style={{ background: "#0f0f0f", width: 260, maxWidth: "85vw", padding: 24, display: "flex", flexDirection: "column", gap: 4, overflowY: "auto", overflowX: "hidden" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", animation: "slideIn .22s ease" }}>
+      <style>{`@keyframes slideIn { from { opacity:0; transform:translateX(-12px) } to { opacity:1; transform:translateX(0) } }`}</style>
+      <div style={{ background: "#0c0c0f", width: 280, maxWidth: "88vw", display: "flex", flexDirection: "column", overflowY: "auto", overflowX: "hidden", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
+        {/* Header del drawer */}
+        <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.07)", display: "flex", alignItems: "center", justifyContent: "space-between", background: "rgba(255,255,255,0.03)" }}>
           <Logo />
-          <button onClick={() => setMenu(false)} style={{ background: "none", border: "none", color: "#fff", fontSize: 22, cursor: "pointer" }}>✕</button>
+          <button onClick={() => setMenu(false)} style={{ background: "rgba(255,255,255,0.08)", border: "none", color: "#fff", width: 32, height: 32, borderRadius: 8, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>✕</button>
         </div>
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Buscar..."
-          style={{ width: "100%", background: "#1a1a1a", border: "1px solid #333", borderRadius: 8, padding: "8px 14px", color: "#fff", fontSize: 13, outline: "none", marginBottom: 12, fontFamily: "'Poppins', sans-serif" }}
-        />
-        {["Todos", ...CATEGORIES.map(c => c.name)].map(c => (
-          <button
-            key={c}
-            onClick={() => { c === "Todos" ? goHome() : openCat(c); }}
-            style={{ background: "none", border: "none", color: "#d1d5db", fontSize: 14, padding: "12px 8px", cursor: "pointer", borderRadius: 8, textAlign: "left", display: "flex", justifyContent: "space-between", fontFamily: "'Poppins', sans-serif" }}
-          >
-            {c}<span style={{ color: "#555" }}>›</span>
+        {/* Buscador */}
+        <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ position: "relative" }}>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar productos..."
+              style={{ width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 14px 10px 36px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+            />
+            <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#666" }}><IcoSearch s={15} /></div>
+          </div>
+        </div>
+        {/* Nav links */}
+        <nav style={{ flex: 1, padding: "8px 12px" }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: "#444", textTransform: "uppercase", letterSpacing: 1.2, padding: "10px 8px 6px" }}>Categorías</p>
+          {["Todos", ...CATEGORIES.map(c => c.name)].map(c => (
+            <button key={c} onClick={() => { c === "Todos" ? goHome() : openCat(c); }}
+              style={{ width: "100%", background: "none", border: "none", color: "#d1d5db", fontSize: 14, padding: "11px 10px", cursor: "pointer", borderRadius: 10, textAlign: "left", display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'Poppins', sans-serif", transition: "background .15s" }}
+              onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.06)"}
+              onMouseLeave={e => e.currentTarget.style.background = "none"}
+            >
+              <span>{c === "Todos" ? "🛍️ Todos los productos" : c}</span>
+              <span style={{ color: "#444", fontSize: 16 }}>›</span>
+            </button>
+          ))}
+          <div style={{ height: 1, background: "rgba(255,255,255,0.06)", margin: "8px 0" }} />
+          <button onClick={() => { openConfig(); setMenu(false); }}
+            style={{ width: "100%", background: "rgba(91,33,182,0.15)", border: "1px solid rgba(91,33,182,0.3)", color: "#a78bfa", fontSize: 14, padding: "12px 10px", cursor: "pointer", borderRadius: 10, textAlign: "left", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>
+            ⚙️ Configura tu PC
           </button>
-        ))}
-        <button onClick={() => { openConfig(); setMenu(false); }} style={{ background: "none", border: "none", color: "#a78bfa", fontSize: 14, padding: "12px 8px", cursor: "pointer", borderRadius: 8, textAlign: "left", fontWeight: 700, fontFamily: "'Poppins', sans-serif" }}>
-          ⚙️ Configura tu PC
-        </button>
+        </nav>
+        {/* Footer del drawer */}
+        <div style={{ padding: "16px 20px", borderTop: "1px solid rgba(255,255,255,0.07)" }}>
+          <button onClick={() => openWA("Hola! Necesito ayuda 😊")}
+            style={{ width: "100%", background: "#25d366", color: "#fff", border: "none", borderRadius: 10, padding: "12px 0", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            <IcoWA s={18} /> Escríbenos
+          </button>
+        </div>
       </div>
-      <div style={{ flex: 1, background: "#00000088" }} onClick={() => setMenu(false)} />
+      <div style={{ flex: 1, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }} onClick={() => setMenu(false)} />
     </div>
   );
 
@@ -1104,13 +1197,7 @@ function AppInner() {
     <div>
       {/* HERO SLIDER — imagen limpia, sin texto superpuesto */}
       <div className="hero-wrap" style={{ position: "relative", overflow: "hidden", background: "#000", width: "100%" }}>
-        <style>{`
-          .hero-wrap { height: 55vw; min-height: 320px; max-height: 680px; width: 100%; max-width: 100%; }
-          @media(max-width:768px){ .hero-wrap{ height: 72vw; min-height: 260px; max-height: 520px; } }
-          .hero-img { width:100%; height:100%; object-fit:cover; display:block; }
-          .hero-arrow { position:absolute; top:50%; transform:translateY(-50%); background:#00000055; border:none; color:#fff; font-size:24px; width:44px; height:44px; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; transition:background .18s; backdrop-filter:blur(4px); }
-          .hero-arrow:hover { background:#00000099; }
-        `}</style>
+
 
         {/* Track */}
         <div style={{ display: "flex", height: "100%", transition: "transform .6s cubic-bezier(.77,0,.18,1)", transform: `translateX(-${heroSlide * 100}%)`, willChange: "transform" }}>
@@ -1151,10 +1238,10 @@ function AppInner() {
         )}
       </div>
 
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)" }}>
 
         {/* CATEGORÍAS */}
-        <div style={{ padding: "48px 0 0" }}>
+        <div style={{ padding: "clamp(28px,5vw,52px) 0 0" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div>
               <p style={{ fontSize: 12, color: "#5b21b6", fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Explora</p>
@@ -1168,7 +1255,7 @@ function AppInner() {
                 <img src={c.img} alt={c.name} style={{ width: "100%", height: 100, objectFit: "cover" }} loading="lazy" />
                 <div style={{ padding: "10px 10px 14px" }}>
                   <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 3 }}>{c.name}</p>
-                  <p style={{ fontSize: 11, color: "#9ca3af", marginBottom: 8 }}>{c.desc}</p>
+                  <p className="cat-desc" style={{ fontSize: 11, color: "#9ca3af", marginBottom: 8 }}>{c.desc}</p>
                   <div style={{ width: 24, height: 24, borderRadius: "50%", border: "1.5px solid #5b21b6", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto" }}>
                     <span style={{ color: "#5b21b6", fontSize: 14 }}>+</span>
                   </div>
@@ -1179,7 +1266,7 @@ function AppInner() {
         </div>
 
         {/* BANNERS PROMO */}
-        <div className="promo-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, margin: "40px 0" }}>
+        <div className="promo-grid" style={{ margin: "clamp(20px,4vw,40px) 0" }}>
           {(() => {
             const b = banners.find(b => b.id === "promo1" && b.img);
             return b
@@ -1218,7 +1305,7 @@ function AppInner() {
         </div>
 
         {/* PRODUCTOS DESTACADOS */}
-        <div style={{ marginBottom: 48 }}>
+        <div style={{ marginBottom: "clamp(28px,5vw,52px)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <div>
               <p style={{ fontSize: 12, color: "#5b21b6", fontWeight: 700, marginBottom: 4, textTransform: "uppercase", letterSpacing: 1 }}>Lo mejor</p>
@@ -1244,8 +1331,8 @@ function AppInner() {
       </div>
 
       {/* BENEFICIOS */}
-      <div style={{ background: "#0f0f0f", padding: "24px 0" }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ background: "#0f0f0f", padding: "clamp(20px,3vw,32px) 0" }}>
+        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)" }}>
           <div className="benefits-row" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
             {[
               [<IcoTruck s={28} />, "Contra entrega",    "A todo el país"],
@@ -1290,10 +1377,10 @@ function AppInner() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 24px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)" }}>
 
         {/* MARCAS */}
-        <div style={{ padding: "48px 0" }}>
+        <div style={{ padding: "clamp(24px,4vw,52px) 0" }}>
           <h2 className="section-title" style={{ marginBottom: 24 }}>Las mejores marcas en un solo lugar</h2>
           <div className="brands-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
             {BRANDS.map(b => (
@@ -1310,7 +1397,7 @@ function AppInner() {
         </div>
 
         {/* RESEÑAS */}
-        <div style={{ marginBottom: 48 }}>
+        <div style={{ marginBottom: "clamp(28px,5vw,52px)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
             <h2 className="section-title">Lo que dicen nuestros clientes</h2>
           </div>
@@ -1335,7 +1422,7 @@ function AppInner() {
 
         {/* NEWSLETTER */}
         <div
-          style={{ background: "linear-gradient(135deg,#f5f3ff,#ede9fe)", borderRadius: 20, padding: "40px 32px", marginBottom: 48, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
+          style={{ background: "linear-gradient(135deg,#f5f3ff,#ede9fe)", borderRadius: 20, padding: "clamp(24px,4vw,44px) clamp(20px,3vw,36px)", marginBottom: "clamp(28px,4vw,52px)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
           className="newsletter-inner"
         >
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -1361,7 +1448,7 @@ function AppInner() {
       </div>
 
       {/* FOOTER */}
-      <footer style={{ background: "#0a0a0f", padding: "48px 24px 24px" }}>
+      <footer style={{ background: "#0a0a0f", padding: "clamp(32px,5vw,56px) clamp(16px,3vw,32px) 24px" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto" }}>
           <div className="footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1.5fr", gap: 32, marginBottom: 40 }}>
             <div>
@@ -1440,7 +1527,7 @@ function AppInner() {
           </div>
         )
         : (
-          <div className="cart-layout" style={{ maxWidth: 960, margin: "0 auto", padding: "32px 24px", display: "grid", gridTemplateColumns: "1fr 340px", gap: 24 }}>
+          <div className="cart-layout" style={{ maxWidth: 960, margin: "0 auto", padding: "clamp(20px,4vw,36px) clamp(16px,3vw,28px)" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {cart.map(item => (
                 <div key={item.id} style={{ background: "#fff", borderRadius: 14, padding: 16, display: "flex", gap: 14, border: "1.5px solid #e5e7eb", alignItems: "center" }}>
