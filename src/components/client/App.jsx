@@ -84,6 +84,7 @@ const css = `
 
   /* ── HERO ── */
   .hero-wrap { position: relative; overflow: hidden; background: #000; width: 100%; height: 56vw; min-height: 300px; max-height: 700px; }
+  .hero-wrap img { object-position: center center; }
   .hero-img  { width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .4s; }
   .hero-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.4); border: none; color: #fff; font-size: 22px; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; transition: background .18s; backdrop-filter: blur(6px); }
   .hero-arrow:hover { background: rgba(0,0,0,.7); }
@@ -125,7 +126,7 @@ const css = `
     .hide-desktop { display: flex !important; }
 
     /* hero */
-    .hero-wrap   { height: 40vh; min-height: 200px; max-height: 320px; }
+    .hero-wrap   { height: 45vw; min-height: 200px; max-height: 300px; }
     .hero-arrow  { width: 32px; height: 32px; font-size: 18px; }
 
     /* grids */
@@ -155,7 +156,7 @@ const css = `
   ══════════════════════════════════════════════ */
   @media (max-width: 480px) {
     .cat-grid  { grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; }
-    .hero-wrap { height: 38vh; }
+    .hero-wrap { height: 44vw; }
     .prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
   }
 
@@ -267,6 +268,7 @@ function ProductView({ p, onBack, onAddCart }) {
   const allImages = [p.img, ...(p.images || [])].filter(Boolean);
 
   const [activeImg, setActiveImg] = useState(0);
+  const lightboxTouchX = useRef(0);
   const [zoom,      setZoom]      = useState(false);   // hover zoom activo
   const [lightbox,  setLightbox]  = useState(false);   // modal pantalla completa
   const [mousePos,  setMousePos]  = useState({ x: 50, y: 50 }); // % para zoom
@@ -357,28 +359,30 @@ function ProductView({ p, onBack, onAddCart }) {
 
       {/* Lightbox */}
       {lightbox && (
-        <div className="lightbox-overlay" onClick={() => setLightbox(false)}>
+        <div
+          className="lightbox-overlay"
+          onClick={() => setLightbox(false)}
+          onTouchStart={e => { lightboxTouchX.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            const dx = e.changedTouches[0].clientX - lightboxTouchX.current;
+            if (Math.abs(dx) > 50) {
+              if (dx < 0) setActiveImg(i => (i + 1) % allImages.length);
+              else setActiveImg(i => (i - 1 + allImages.length) % allImages.length);
+            }
+          }}
+        >
           <button className="lightbox-close" onClick={() => setLightbox(false)}>✕</button>
 
           {allImages.length > 1 && (
-            <button
-              className="lightbox-nav"
-              style={{ left: 20 }}
+            <button className="lightbox-nav" style={{ left: 20 }}
               onClick={e => { e.stopPropagation(); setActiveImg(i => (i - 1 + allImages.length) % allImages.length); }}
             >‹</button>
           )}
 
-          <img
-            className="lightbox-img"
-            src={allImages[activeImg]}
-            alt={p.name}
-            onClick={e => e.stopPropagation()}
-          />
+          <img className="lightbox-img" src={allImages[activeImg]} alt={p.name} onClick={e => e.stopPropagation()} />
 
           {allImages.length > 1 && (
-            <button
-              className="lightbox-nav"
-              style={{ right: 20 }}
+            <button className="lightbox-nav" style={{ right: 20 }}
               onClick={e => { e.stopPropagation(); setActiveImg(i => (i + 1) % allImages.length); }}
             >›</button>
           )}
@@ -386,14 +390,9 @@ function ProductView({ p, onBack, onAddCart }) {
           {allImages.length > 1 && (
             <div className="lightbox-dots">
               {allImages.map((_, i) => (
-                <div
-                  key={i}
-                  onClick={e => { e.stopPropagation(); setActiveImg(i); }}
-                  style={{
-                    width: i === activeImg ? 24 : 8, height: 8,
-                    borderRadius: 4, background: i === activeImg ? "#a78bfa" : "#ffffff66",
-                    cursor: "pointer", transition: "all .25s",
-                  }}
+                <div key={i} onClick={e => { e.stopPropagation(); setActiveImg(i); }}
+                  style={{ width: i === activeImg ? 24 : 8, height: 8, borderRadius: 4,
+                    background: i === activeImg ? "#a78bfa" : "#ffffff66", cursor: "pointer", transition: "all .25s" }}
                 />
               ))}
             </div>
@@ -1201,24 +1200,6 @@ function AppInner() {
   // ── HOME VIEW ─────────────────────────────────────────
   const HomeView = () => (
     <div>
-      {/* BARRA BÚSQUEDA MÓVIL — sticky bajo el header */}
-      <div className="hide-desktop" style={{ background: "#0f0f0f", padding: "8px 16px 10px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-        <div style={{ position: "relative" }}>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => { if(e.key === "Enter") setView("category"); }}
-            placeholder="Buscar productos..."
-            style={{ width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 70px 10px 36px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
-          />
-          <div style={{ position: "absolute", left: 10, top: "50%", transform: "translateY(-50%)", color: "#666" }}><IcoSearch s={15} /></div>
-          <button
-            onClick={() => setView("category")}
-            style={{ position: "absolute", right: 6, top: "50%", transform: "translateY(-50%)", background: "#5b21b6", border: "none", borderRadius: 8, padding: "6px 12px", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Poppins',sans-serif" }}
-          >Buscar</button>
-        </div>
-      </div>
-
       {/* HERO SLIDER — imagen limpia, sin texto superpuesto */}
       <div className="hero-wrap" style={{ position: "relative", overflow: "hidden", background: "#000", width: "100%" }}>
 
@@ -1294,7 +1275,7 @@ function AppInner() {
           {(() => {
             const b = banners.find(b => b.id === "promo1" && b.img);
             return b
-              ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: 200 }} onClick={() => openCat("Todos")}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
+              ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: "clamp(140px,25vw,220px)" }} onClick={() => openCat("Todos")}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
               : (
                 <div style={{ background: "linear-gradient(135deg,#1a0533,#2d1b69)", borderRadius: 16, padding: "28px 24px", position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => openCat("Todos")}>
                   <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "45%", opacity: .4, overflow: "hidden" }}>
@@ -1314,7 +1295,7 @@ function AppInner() {
           {(() => {
             const b = banners.find(b => b.id === "promo2" && b.img);
             return b
-              ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: 200 }}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
+              ? <div style={{ borderRadius: 16, overflow: "hidden", cursor: "pointer", height: "clamp(140px,25vw,220px)" }}><img src={b.img} alt="Promo" style={{ width: "100%", height: "100%", objectFit: "cover" }} /></div>
               : (
                 <div style={{ background: "linear-gradient(135deg,#0f172a,#1e293b)", borderRadius: 16, padding: "28px 24px", position: "relative", overflow: "hidden", cursor: "pointer" }} onClick={() => openWA("Hola! Quiero armar mi PC ideal.")}>
                   <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: "50%", opacity: .5, overflow: "hidden" }}>
@@ -1380,18 +1361,23 @@ function AppInner() {
           <img
             src="/addi-banner.webp"
             alt="Addi — Compra ahora, paga después"
-            style={{ width: "100%", display: "block", objectFit: "cover", maxHeight: 220 }}
+            style={{ width: "100%", display: "block", objectFit: "cover", objectPosition: "left center", maxHeight: "clamp(120px,22vw,220px)" }}
             loading="lazy"
           />
-          {/* Botón "Conoce más" flotante sobre la imagen */}
+          {/* Botón "Conoce más" flotante */}
           <button
             onClick={() => openWA("Hola! Quisiera información sobre el financiamiento con Addi para comprar en ONE PC 😊")}
             style={{
-              position: "absolute", bottom: 28, left: 40,
+              position: "absolute",
+              bottom: "clamp(10px,3vw,28px)",
+              left: "clamp(12px,4vw,40px)",
               background: "#3b5bdb", color: "#fff", border: "none",
-              borderRadius: 8, padding: "11px 28px", fontSize: 14, fontWeight: 700,
+              borderRadius: 8,
+              padding: "clamp(7px,1.5vw,11px) clamp(14px,3vw,28px)",
+              fontSize: "clamp(11px,2vw,14px)", fontWeight: 700,
               cursor: "pointer", fontFamily: "'Poppins',sans-serif",
               boxShadow: "0 4px 16px #3b5bdb55", transition: "background .2s",
+              whiteSpace: "nowrap",
             }}
             onMouseEnter={e => e.currentTarget.style.background = "#2f4ac4"}
             onMouseLeave={e => e.currentTarget.style.background = "#3b5bdb"}
@@ -1406,11 +1392,11 @@ function AppInner() {
         {/* MARCAS */}
         <div style={{ padding: "clamp(24px,4vw,52px) 0" }}>
           <h2 className="section-title" style={{ marginBottom: 24 }}>Las mejores marcas en un solo lugar</h2>
-          <div className="brands-row" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
             {BRANDS.map(b => (
               <div
                 key={b}
-                style={{ padding: "10px 16px", border: "1.5px solid #f0f0f0", borderRadius: 10, fontSize: 14, fontWeight: 800, color: "#374151", cursor: "pointer", transition: "all .2s" }}
+                style={{ padding: "12px 16px", border: "1.5px solid #f0f0f0", borderRadius: 10, fontSize: 14, fontWeight: 800, color: "#374151", cursor: "pointer", transition: "all .2s", textAlign: "center" }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = "#5b21b6"; e.currentTarget.style.color = "#5b21b6"; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = "#f0f0f0"; e.currentTarget.style.color = "#374151"; }}
               >
@@ -1444,31 +1430,6 @@ function AppInner() {
           </div>
         </div>
 
-        {/* NEWSLETTER */}
-        <div
-          style={{ background: "linear-gradient(135deg,#f5f3ff,#ede9fe)", borderRadius: 20, padding: "clamp(24px,4vw,44px) clamp(20px,3vw,36px)", marginBottom: "clamp(28px,4vw,52px)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
-          className="newsletter-inner"
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-            <div style={{ width: 48, height: 48, background: "#5b21b6", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontSize: 22 }}>✉️</span>
-            </div>
-            <div>
-              <p style={{ fontSize: 17, fontWeight: 800, marginBottom: 3 }}>No te pierdas nuestras ofertas</p>
-              <p style={{ fontSize: 13, color: "#6b7280" }}>Suscríbete y recibe promociones exclusivas.</p>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <input
-              className="input-field"
-              placeholder="Tu correo electrónico"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              style={{ width: 240 }}
-            />
-            <button className="btn-primary" onClick={() => { showToast("✓ Suscrito exitosamente"); setEmail(""); }}>Suscribirme</button>
-          </div>
-        </div>
       </div>
 
       {/* FOOTER */}
