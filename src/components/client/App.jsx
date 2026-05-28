@@ -1092,7 +1092,8 @@ function AppInner() {
   );
 
   // ── HEADER ────────────────────────────────────────────
-  const Header = () => (
+  // Header → renderizado directamente para evitar pérdida de foco en el input
+  const headerEl = (
     <header style={{ background: "rgba(15,15,15,0.96)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 4px 24px #000a", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
       <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)", display: "flex", alignItems: "center", gap: "clamp(12px,2vw,24px)", height: "clamp(52px,7vw,64px)" }}>
         <button onClick={() => setMenu(!menuOpen)} className="hide-desktop" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 6, borderRadius: 8, display: "flex", alignItems: "center" }}>
@@ -1109,24 +1110,16 @@ function AppInner() {
             { label: "Soporte",         action: () => openWA("Hola! Necesito ayuda 😊") },
           ].map(n => (
             <div key={n.label} style={{ position: "relative" }}>
-              <span
-                className={`nav-link${n.highlight ? " active" : ""}`}
-                onClick={n.action}
-                style={{ display: "flex", alignItems: "center", gap: 4 }}
-              >
+              <span className={`nav-link${n.highlight ? " active" : ""}`} onClick={n.action} style={{ display: "flex", alignItems: "center", gap: 4 }}>
                 {n.label}
                 {n.dropdown && <span style={{ fontSize: 10, color: "#9ca3af" }}>{catMenu ? "▲" : "▼"}</span>}
               </span>
               {n.dropdown && catMenu && (
                 <div style={{ position: "absolute", top: "calc(100% + 12px)", left: 0, background: "#1a1a1a", border: "1px solid #333", borderRadius: 12, padding: 8, minWidth: 200, zIndex: 200, boxShadow: "0 8px 32px #000a" }}>
                   {CATEGORIES.map(c => (
-                    <div
-                      key={c.name}
-                      onClick={() => openCat(c.name)}
-                      style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, cursor: "pointer" }}
+                    <div key={c.name} onClick={() => openCat(c.name)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, cursor: "pointer" }}
                       onMouseEnter={e => e.currentTarget.style.background = "#ffffff11"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                    >
+                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
                       <img src={c.img} alt={c.name} style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 6 }} loading="lazy" />
                       <div>
                         <p style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{c.name}</p>
@@ -1141,22 +1134,25 @@ function AppInner() {
         </nav>
 
         {/* Buscador desktop */}
-        <div style={{ flex: 1, position: "relative", maxWidth: 340 }} className="hide-mobile">
+        <div style={{ flex: 1, position: "relative", maxWidth: 340, display: "flex" }} className="hide-mobile">
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && setView("category")}
+            onKeyDown={e => { if(e.key === "Enter") { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
             placeholder="Buscar productos..."
-            style={{ width: "100%", background: "#1a1a1a", border: "1px solid #333", borderRadius: 8, padding: "8px 36px 8px 14px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+            style={{ width: "100%", background: "#1a1a1a", border: "1px solid #333", borderRadius: 8, padding: "8px 40px 8px 14px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
           />
-          <div style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#666" }}><IcoSearch /></div>
+          <div onClick={() => { if(search.trim()) { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
+            style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#666", cursor: "pointer" }}>
+            <IcoSearch />
+          </div>
         </div>
 
         {/* Íconos derecha */}
         <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto", flexShrink: 0 }}>
           <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setSearchOpen(v => !v)}><IcoSearch s={20} /></div>
           <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-mobile"><IcoUser /></div>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }} onClick={() => {/* Wishlist futura */}}><IcoHeart s={18} /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} onClick={() => {}}><IcoHeart s={18} /></div>
           <div style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center" }} onClick={() => setView("cart")}>
             <IcoCart s={22} c="#d1d5db" />
             {cartCount > 0 && (
@@ -1772,7 +1768,7 @@ function AppInner() {
       )}
 
       {menuOpen && <MobileMenu />}
-      <Header />
+      {headerEl}
       {/* Barra búsqueda móvil desplegable */}
       {searchOpen && (
         <div className="hide-desktop" style={{ background: "#0f0f0f", padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)", position: "sticky", top: "clamp(52px,7vw,64px)", zIndex: 99 }}>
