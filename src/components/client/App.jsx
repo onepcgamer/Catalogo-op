@@ -13,7 +13,7 @@ const DEFAULT_CATS = [
   { id: 1, name: "Combos",      img: "https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=200&q=80", desc: "Arma tu set perfecto" },
   { id: 2, name: "Torres",      img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=200&q=80", desc: "Potencia y diseño" },
   { id: 3, name: "Portátiles",  img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=200&q=80", desc: "Rendimiento portátil" },
-  { id: 4, name: "Monitores",   img: "https://i0.wp.com/www.gamerfocus.co/wp-content/uploads/2023/01/Estos-son-los-monitores-gamer-revelados-por-ASUS-Samsung-Alienware-y-LG-en-CES-2023.jpg?fit=720%2C394&ssl=1", desc: "Imágenes increíbles" },
+  { id: 4, name: "Monitores",   img: "https://i0.wp.com/www.gamerfocus.co/wp-content/uploads/2023/01/Estos-son-los-monitores-gamer-revelados-por-ASUS-Samsung-Alienware-y-LG-en-CES-2023.jpg?resize=720%2C394&ssl=1", desc: "Imágenes increíbles" },
   { id: 5, name: "Componentes", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80", desc: "Mejora tu equipo" },
   { id: 6, name: "Accesorios",  img: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=200&q=80", desc: "Completa tu setup" },
 ];
