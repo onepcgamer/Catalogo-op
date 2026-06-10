@@ -1,8 +1,15 @@
 // ═══════════════════════════════════════════════════
-// src/App.jsx  —  ONE PC · Tienda principal
+// src/App.jsx  —  ONE PC · Tienda principal · v2
 // ═══════════════════════════════════════════════════
 import { useState, useEffect, useRef, useCallback } from "react";
-import { getProducts, getBanners, getCategories, getProductComponents } from "../../utils/store.js";
+import { useState, useEffect, useRef } from "react";
+import {
+  getProducts, saveProducts, addProduct, updateProduct, deleteProduct, updateStock,
+  getBrands, saveBrands, addBrand, updateBrand, deleteBrand, toggleBrand,
+  getAllComponents, getProductComponents, saveProductComponents, deleteProductComponents,
+  getBanners, saveBanners, getCategories, saveCategories,
+  COMP_TYPES_TORRE, COMP_TYPES_PORTATIL, COMP_TYPES_MONITOR, DEFAULT_OPTIONS,
+} from "../../utils/store.js";
 
 // Guard: solo corre en cliente (Astro SSR safe)
 const isBrowser = typeof window !== "undefined";
@@ -13,7 +20,7 @@ const DEFAULT_CATS = [
   { id: 1, name: "Combos",      img: "https://images.unsplash.com/photo-1593640495253-23196b27a87f?w=200&q=80", desc: "Arma tu set perfecto" },
   { id: 2, name: "Torres",      img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=200&q=80", desc: "Potencia y diseño" },
   { id: 3, name: "Portátiles",  img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=200&q=80", desc: "Rendimiento portátil" },
-  { id: 4, name: "Monitores",   img: "https://i0.wp.com/www.gamerfocus.co/wp-content/uploads/2023/01/Estos-son-los-monitores-gamer-revelados-por-ASUS-Samsung-Alienware-y-LG-en-CES-2023.jpg?resize=720%2C394&ssl=1", desc: "Imágenes increíbles" },
+  { id: 4, name: "Monitores",   img: "https://images.unsplash.com/photo-1527443224154-c4a573d5f5b7?w=200&q=80", desc: "Imágenes increíbles" },
   { id: 5, name: "Componentes", img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80", desc: "Mejora tu equipo" },
   { id: 6, name: "Accesorios",  img: "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?w=200&q=80", desc: "Completa tu setup" },
 ];
@@ -981,6 +988,57 @@ function CategoryView({ PRODUCTS, selCat, search, onSearch, goHome, openProd, ad
 }
 
 
+// ── HEADER — componente externo para evitar stale closures ──────────────
+function AppHeader({ menuOpen, setMenu, search, setSearch,
+                     cartCount, openCat, openConfig, openWA, goHome, setView, setSelCat, setSearchOpen }) {
+  return (
+    <header style={{ background: "rgba(15,15,15,0.96)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 4px 24px #000a", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)", display: "flex", alignItems: "center", gap: "clamp(12px,2vw,24px)", height: "clamp(52px,7vw,64px)" }}>
+        <button onClick={() => setMenu(v => !v)} className="hide-desktop" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 6, borderRadius: 8, display: "flex", alignItems: "center" }}>
+          <IcoMenu />
+        </button>
+        <div onClick={goHome} style={{ cursor: "pointer", flexShrink: 0 }}><Logo /></div>
+
+        <nav className="hide-mobile" style={{ display: "flex", gap: 24 }}>
+          <span className="nav-link" onClick={() => openCat("Todos")} style={{ cursor: "pointer" }}>Productos</span>
+
+          <span className="nav-link active" onClick={() => openCat("Todos")} style={{ cursor: "pointer" }}>Ofertas</span>
+          <span className="nav-link" onClick={openConfig} style={{ cursor: "pointer" }}>Configura tu PC</span>
+          <span className="nav-link" onClick={() => openWA("Hola! Necesito ayuda 😊")} style={{ cursor: "pointer" }}>Soporte</span>
+        </nav>
+
+        <div style={{ flex: 1, position: "relative", maxWidth: 340, display: "flex" }} className="hide-mobile">
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            onKeyDown={e => { if(e.key === "Enter") { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
+            placeholder="Buscar productos..."
+            style={{ width: "100%", background: "#1a1a1a", border: "1px solid #333", borderRadius: 8, padding: "8px 40px 8px 14px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
+          />
+          <div onClick={() => { if(search.trim()) { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
+            style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#666", cursor: "pointer" }}>
+            <IcoSearch />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto", flexShrink: 0 }}>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setSearchOpen(v => !v)}><IcoSearch s={20} /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-mobile"><IcoUser /></div>
+          <div style={{ color: "#d1d5db", cursor: "pointer" }}><IcoHeart s={18} /></div>
+          <div style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center" }} onClick={() => setView("cart")}>
+            <IcoCart s={22} c="#d1d5db" />
+            {cartCount > 0 && (
+              <span style={{ position: "absolute", top: -8, right: -8, background: "#5b21b6", color: "#fff", borderRadius: "50%", width: 20, height: 20, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
+                {cartCount}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+}
+
 function AppInner() {
   const [view,      setView]     = useState("home");
   const [selCat,    setSelCat]   = useState("Todos");
@@ -1060,13 +1118,7 @@ function AppInner() {
     return () => clearInterval(t);
   }, [heroData.length]);
 
-  // Cerrar dropdown categorías al hacer clic afuera
-  useEffect(() => {
-    if (!catMenu) return;
-    const close = () => setCatMenu(false);
-    document.addEventListener("click", close, { capture: true });
-    return () => document.removeEventListener("click", close, { capture: true });
-  }, [catMenu]);
+
 
   const showToast = msg => { setToast(msg); setTimeout(() => setToast(""), 2200); };
   const addCart   = p  => {
@@ -1081,6 +1133,7 @@ function AppInner() {
   const toggleWish = id  => setWish(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   const openProd   = p   => { setSelProd(p); setView("product"); window.scrollTo(0, 0); };
   const openCat    = cat => { setSelCat(cat); setView("category"); window.scrollTo(0, 0); setCatMenu(false); setMenu(false); };
+
   const goHome     = ()  => { setView("home"); setSelCat("Todos"); window.scrollTo(0, 0); };
   const openConfig = ()  => { setView("configurador"); window.scrollTo(0, 0); };
 
@@ -1092,80 +1145,7 @@ function AppInner() {
   );
 
   // ── HEADER ────────────────────────────────────────────
-  // Header → renderizado directamente para evitar pérdida de foco en el input
-  const headerEl = (
-    <header style={{ background: "rgba(15,15,15,0.96)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 100, boxShadow: "0 1px 0 rgba(255,255,255,0.06), 0 4px 24px #000a", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 clamp(16px,3vw,32px)", display: "flex", alignItems: "center", gap: "clamp(12px,2vw,24px)", height: "clamp(52px,7vw,64px)" }}>
-        <button onClick={() => setMenu(!menuOpen)} className="hide-desktop" style={{ background: "none", border: "none", color: "#fff", cursor: "pointer", padding: 6, borderRadius: 8, display: "flex", alignItems: "center" }}>
-          <IcoMenu />
-        </button>
-        <div onClick={goHome} style={{ cursor: "pointer", flexShrink: 0 }}><Logo /></div>
-
-        <nav className="hide-mobile" style={{ display: "flex", gap: 24 }}>
-          {[
-            { label: "Productos",       action: () => openCat("Todos") },
-            { label: "Categorías",      action: e => { e.stopPropagation(); setCatMenu(v => !v); }, dropdown: true },
-            { label: "Ofertas",         action: () => openCat("Todos"), highlight: true },
-            { label: "Configura tu PC", action: openConfig },
-            { label: "Soporte",         action: () => openWA("Hola! Necesito ayuda 😊") },
-          ].map(n => (
-            <div key={n.label} style={{ position: "relative" }}>
-              <span className={`nav-link${n.highlight ? " active" : ""}`} onClick={n.action} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                {n.label}
-                {n.dropdown && <span style={{ fontSize: 10, color: "#9ca3af" }}>{catMenu ? "▲" : "▼"}</span>}
-              </span>
-              {n.dropdown && catMenu && (
-                <div style={{ position: "absolute", top: "calc(100% + 12px)", left: 0, background: "#1a1a1a", border: "1px solid #333", borderRadius: 12, padding: 8, minWidth: 200, zIndex: 200, boxShadow: "0 8px 32px #000a" }}>
-                  {CATEGORIES.map(c => (
-                    <div key={c.name} onClick={() => openCat(c.name)} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 14px", borderRadius: 8, cursor: "pointer" }}
-                      onMouseEnter={e => e.currentTarget.style.background = "#ffffff11"}
-                      onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                      <img src={c.img} alt={c.name} style={{ width: 32, height: 32, objectFit: "cover", borderRadius: 6 }} loading="lazy" />
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#fff" }}>{c.name}</p>
-                        <p style={{ fontSize: 11, color: "#6b7280" }}>{c.desc}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
-
-        {/* Buscador desktop */}
-        <div style={{ flex: 1, position: "relative", maxWidth: 340, display: "flex" }} className="hide-mobile">
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => { if(e.key === "Enter") { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
-            placeholder="Buscar productos..."
-            style={{ width: "100%", background: "#1a1a1a", border: "1px solid #333", borderRadius: 8, padding: "8px 40px 8px 14px", color: "#fff", fontSize: 13, outline: "none", fontFamily: "'Poppins', sans-serif" }}
-          />
-          <div onClick={() => { if(search.trim()) { setSelCat("Todos"); setView("category"); window.scrollTo(0,0); } }}
-            style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#666", cursor: "pointer" }}>
-            <IcoSearch />
-          </div>
-        </div>
-
-        {/* Íconos derecha */}
-        <div style={{ display: "flex", alignItems: "center", gap: 16, marginLeft: "auto", flexShrink: 0 }}>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-desktop" onClick={() => setSearchOpen(v => !v)}><IcoSearch s={20} /></div>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }} className="hide-mobile"><IcoUser /></div>
-          <div style={{ color: "#d1d5db", cursor: "pointer" }} onClick={() => {}}><IcoHeart s={18} /></div>
-          <div style={{ position: "relative", cursor: "pointer", display: "flex", alignItems: "center" }} onClick={() => setView("cart")}>
-            <IcoCart s={22} c="#d1d5db" />
-            {cartCount > 0 && (
-              <span style={{ position: "absolute", top: -8, right: -8, background: "#5b21b6", color: "#fff", borderRadius: "50%", width: 20, height: 20, fontSize: 11, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800 }}>
-                {cartCount}
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
-  );
-
+  // Header → componente externo AppHeader
   // ── MOBILE MENU ───────────────────────────────────────
   const MobileMenu = () => (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex", animation: "slideIn .22s ease" }}>
@@ -1768,7 +1748,15 @@ function AppInner() {
       )}
 
       {menuOpen && <MobileMenu />}
-      {headerEl}
+      <AppHeader
+        menuOpen={menuOpen} setMenu={setMenu}
+        search={search} setSearch={setSearch}
+        cartCount={cartCount}
+        openCat={openCat} openConfig={openConfig}
+        openWA={openWA} goHome={goHome}
+        setView={setView} setSelCat={setSelCat}
+        setSearchOpen={setSearchOpen}
+      />
       {/* Barra búsqueda móvil desplegable */}
       {searchOpen && (
         <div className="hide-desktop" style={{ background: "#0f0f0f", padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.08)", position: "sticky", top: "clamp(52px,7vw,64px)", zIndex: 99 }}>
