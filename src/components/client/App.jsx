@@ -2,7 +2,6 @@
 // src/App.jsx  —  ONE PC · Tienda principal · v2
 // ═══════════════════════════════════════════════════
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useState, useEffect, useRef } from "react";
 import {
   getProducts, saveProducts, addProduct, updateProduct, deleteProduct, updateStock,
   getBrands, saveBrands, addBrand, updateBrand, deleteBrand, toggleBrand,
