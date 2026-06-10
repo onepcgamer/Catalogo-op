@@ -249,6 +249,7 @@ export const COMP_TYPES_TORRE = [
   {key:"gpu",          label:"Tarjeta Gráfica"},
   {key:"fuente",       label:"Fuente de Poder"},
   {key:"refrigeracion",label:"Refrigeración"},
+  {key:"monitor",      label:"Monitor"},
 ];
 
 export const COMP_TYPES_PORTATIL = [
@@ -256,10 +257,13 @@ export const COMP_TYPES_PORTATIL = [
   {key:"ssd", label:"Almacenamiento SSD M.2"},
 ];
 
+export const COMP_TYPES_MONITOR = []; // Sin componentes configurables
+
 export const DEFAULT_OPTIONS = {
   ram:           [{label:"16 GB DDR4",price:0,incluido:true},{label:"32 GB DDR4",price:180000,incluido:false},{label:"64 GB DDR4",price:420000,incluido:false}],
   ssd:           [{label:"512 GB NVMe",price:0,incluido:true},{label:"1 TB NVMe",price:150000,incluido:false},{label:"2 TB NVMe",price:350000,incluido:false}],
   gpu:           [{label:"Integrada",price:0,incluido:true},{label:"RTX 3050",price:650000,incluido:false},{label:"RTX 4060",price:1200000,incluido:false},{label:"RTX 4070",price:1900000,incluido:false}],
   fuente:        [{label:"350W Estándar",price:0,incluido:true},{label:"650W Bronze",price:120000,incluido:false},{label:"750W Gold",price:280000,incluido:false}],
   refrigeracion: [{label:"Aire estándar",price:0,incluido:true},{label:"Aire premium",price:80000,incluido:false},{label:"Líquida 240mm",price:250000,incluido:false},{label:"Líquida 360mm",price:420000,incluido:false}],
+  monitor:       [{label:"Sin monitor",price:0,incluido:true},{label:"Monitor 24" FHD",price:450000,incluido:false},{label:"Monitor 27" FHD",price:650000,incluido:false},{label:"Monitor 27" QHD",price:950000,incluido:false},{label:"Monitor 32" QHD",price:1200000,incluido:false},{label:"Monitor 32" 4K",price:1800000,incluido:false}],
 };
