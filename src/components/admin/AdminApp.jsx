@@ -4,7 +4,7 @@ import {
   getBrands, saveBrands, addBrand, updateBrand, deleteBrand, toggleBrand,
   getAllComponents, getProductComponents, saveProductComponents, deleteProductComponents,
   getBanners, saveBanners, getCategories, saveCategories,
-  COMP_TYPES_TORRE, COMP_TYPES_PORTATIL, DEFAULT_OPTIONS,
+  COMP_TYPES_TORRE, COMP_TYPES_PORTATIL, COMP_TYPES_MONITOR, DEFAULT_OPTIONS,
 } from "../../utils/store.js";
 
 const ADMIN_USER = { email:"admin@onepc.com", password:"onepc2024" };
@@ -214,7 +214,19 @@ function Brands(){
 // COMP CONFIGURATOR
 // ════════════════════════════════════════════════════
 function CompConfigurator({product,onClose}){
-  const types=product.productType==="portatil"?COMP_TYPES_PORTATIL:COMP_TYPES_TORRE;
+  const types = product.productType==="portatil" ? COMP_TYPES_PORTATIL
+              : product.productType==="monitor"  ? COMP_TYPES_MONITOR
+              : COMP_TYPES_TORRE;
+  if (types.length === 0) return (
+    <div style={{position:"fixed",inset:0,zIndex:300,background:"#00000077",display:"flex",alignItems:"center",justifyContent:"center"}}>
+      <div style={{background:"#fff",borderRadius:18,padding:"40px 32px",maxWidth:400,textAlign:"center"}}>
+        <div style={{fontSize:48,marginBottom:12}}>🖵</div>
+        <h3 style={{fontSize:18,fontWeight:800,marginBottom:8}}>Monitores sin componentes</h3>
+        <p style={{fontSize:14,color:"#6b7280",marginBottom:24}}>Los monitores no tienen componentes configurables.</p>
+        <button onClick={onClose} className="btn btn-blue" style={{padding:"10px 28px"}}>Cerrar</button>
+      </div>
+    </div>
+  );
   const [comps,setComps]=useState(()=>{
     const init={};
     types.forEach(t=>{ init[t.key]=(DEFAULT_OPTIONS[t.key]||[]).map(o=>({...o})); });
@@ -260,7 +272,7 @@ function CompConfigurator({product,onClose}){
           <div>
             <p style={{fontSize:11,color:"#5b21b6",fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>⚙️ Configurador de componentes</p>
             <h3 style={{fontSize:16,fontWeight:800,marginTop:2}}>{product.name}</h3>
-            <p style={{fontSize:12,color:"#6b7280"}}>Tipo: {product.productType==="portatil"?"💻 Portátil":"🖥️ Torre / PC Escritorio"}</p>
+            <p style={{fontSize:12,color:"#6b7280"}}>Tipo: {product.productType==="portatil"?"💻 Portátil":product.productType==="monitor"?"🖵 Monitor":"🖥️ Torre / PC Escritorio"}</p>
           </div>
           <button onClick={onClose} style={{background:"#f3f4f6",border:"none",borderRadius:"50%",width:36,height:36,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
         </div>
@@ -448,9 +460,10 @@ function Products({products,reload}){
           {/* ── TIPO ── */}
           <div style={{marginBottom:14}}>
             <label style={{fontSize:12,fontWeight:600,color:"#374151",display:"block",marginBottom:8}}>Tipo de producto</label>
-            <div style={{display:"flex",gap:10}}>
+            <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
               <button className={`type-btn${form.productType==="torre"?" on":""}`} onClick={()=>setF("productType","torre")}>🖥️ Torre / PC Escritorio</button>
               <button className={`type-btn${form.productType==="portatil"?" on":""}`} onClick={()=>setF("productType","portatil")}>💻 Portátil</button>
+              <button className={`type-btn${form.productType==="monitor"?" on":""}`} onClick={()=>setF("productType","monitor")}>🖵 Monitor</button>
             </div>
           </div>
 
@@ -517,7 +530,7 @@ function Products({products,reload}){
                     <div style={{flex:1,minWidth:0}}>
                       <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
                         <p style={{fontSize:12,fontWeight:700,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</p>
-                        <span style={{background:p.productType==="portatil"?"#dbeafe":"#f5f3ff",color:p.productType==="portatil"?"#1d4ed8":"#5b21b6",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:10,flexShrink:0}}>{p.productType==="portatil"?"💻":"🖥️"}</span>
+                        <span style={{background:p.productType==="portatil"?"#dbeafe":p.productType==="monitor"?"#f0fdf4":"#f5f3ff",color:p.productType==="portatil"?"#1d4ed8":p.productType==="monitor"?"#16a34a":"#5b21b6",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:10,flexShrink:0}}>{p.productType==="portatil"?"💻":p.productType==="monitor"?"🖵":"🖥️"}</span>
                         {p.images?.length>0&&<span style={{background:"#f0fdf4",color:"#16a34a",fontSize:9,fontWeight:700,padding:"1px 6px",borderRadius:10,flexShrink:0}}>📷 +{p.images.length}</span>}
                       </div>
                       <p style={{fontSize:11,color:"#6b7280"}}>{fmt(p.price)} · {p.brand||p.category}</p>
